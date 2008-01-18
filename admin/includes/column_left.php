@@ -19,5 +19,4 @@
   require(DIR_WS_BOXES . 'reports.php');
   require(DIR_WS_BOXES . 'tools.php');
   require(DIR_WS_BOXES . 'doba1.php');
-
 ?>
