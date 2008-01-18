@@ -13,13 +13,6 @@
   class breadcrumb {
     var $_trail;
 
-	/**
-	 * constructor for breadcrumb
-	 * 
-	 * @var int $foo
-	 * 
-	 * @return void 
-	 */
     function breadcrumb() {
       $this->reset();
     }
@@ -28,12 +21,6 @@
       $this->_trail = array();
     }
 
-	/**
-	 * adds a title and link
-	 * @return 
-	 * @param $title string
-	 * @param $link string[option]
-	 */
     function add($title, $link = '') {
       $this->_trail[] = array('title' => $title, 'link' => $link);
     }
@@ -54,7 +41,4 @@
       return $trail_string;
     }
   }
-
-$bc = new breadcrumb();
-$bc->add();
 ?>
