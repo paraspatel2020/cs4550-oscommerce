@@ -9,10 +9,9 @@
 
   Released under the GNU General Public License
 */
-
   require('includes/application_top.php');
 
-  if (!tep_session_is_registered('customer_id')) {
+  if (tep_session_is_registered('customer_id')) {
     $navigation->set_snapshot();
     tep_redirect(tep_href_link(FILENAME_LOGIN, '', 'SSL'));
   }
@@ -104,7 +103,7 @@ function rowOutEffect(object) {
         $order_country = $orders['billing_country'];
       }
 ?>
-                  <tr class="moduleRow" onMouseOver="rowOverEffect(this)" onMouseOut="rowOutEffect(this)" onClick="document.location.href='<?php echo tep_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'order_id=' . $orders['orders_id'], 'SSL'); ?>'">
+                  <tr class="moduleRow" onMouseOver="rowOverEffect(this);" onMouseOut="rowOutEffect(this);" onClick="document.location.href='<?php echo tep_href_link(FILENAME_ACCOUNT_HISTORY_INFO, 'order_id=' . $orders['orders_id'], 'SSL'); ?>';">
                     <td class="main" width="80"><?php echo tep_date_short($orders['date_purchased']); ?></td>
                     <td class="main"><?php echo '#' . $orders['orders_id']; ?></td>
                     <td class="main"><?php echo tep_output_string_protected($order_name) . ', ' . $order_country; ?></td>
