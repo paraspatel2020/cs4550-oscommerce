@@ -10,29 +10,25 @@
   Released under the GNU General Public License
 */
 ?>
-<!-- configuration //-->
+<!-- doba //-->
           <tr>
             <td>
-<!-- <?php
+<?php
   $heading = array();
   $contents = array();
 
-  $heading[] = array('text'  => BOX_HEADING_CONFIGURATION,
-                     'link'  => tep_href_link(FILENAME_CONFIGURATION, 'gID=1&selected_box=configuration'));
+  $heading[] = array('text'  => BOX_HEADING_DOBA,
+                     'link'  => tep_href_link(FILENAME_DOBA_CONFIG, 'selected_box=doba_config'));
 
-  if ($selected_box == 'configuration') {
-    $cfg_groups = '<a href="' . tep_href_link(FILENAME_ADMINISTRATORS, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_CONFIGURATION_ADMINISTRATORS . '</a><br>';
-    $configuration_groups_query = tep_db_query("select configuration_group_id as cgID, configuration_group_title as cgTitle from " . TABLE_CONFIGURATION_GROUP . " where visible = '1' order by sort_order");
-    while ($configuration_groups = tep_db_fetch_array($configuration_groups_query)) {
-      $cfg_groups .= '<a href="' . tep_href_link(FILENAME_CONFIGURATION, 'gID=' . $configuration_groups['cgID'], 'NONSSL') . '" class="menuBoxContentLink">' . $configuration_groups['cgTitle'] . '</a><br>';
-    }
-
-    $contents[] = array('text'  => $cfg_groups);
+  if ($selected_box == 'doba_config') {
+    $contents[] = array('text'  => '<a href="' . tep_href_link(FILENAME_DOBA_CONFIG, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_DOBA_CONFIG . '</a><br>' . 
+								   '<a href="' . tep_href_link(FILENAME_DOBA_PRODUCT_UPLOAD, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_DOBA_UPLOAD_PRODUCT_DATA . '</a><br>' . 
+								   '<a href="' . tep_href_link(FILENAME_DOBA_ORDER_DOWNLOAD, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_DOBA_DOWNLOAD_ORDER_DATA . '</a>');
   }
 
   $box = new box;
   echo $box->menuBox($heading, $contents);
-?> -->
+?>
             </td>
           </tr>
-<!-- configuration_eof //-->
+<!-- doba_eof //-->

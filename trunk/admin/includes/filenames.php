@@ -50,4 +50,8 @@
   define('FILENAME_TAX_RATES', 'tax_rates.php');
   define('FILENAME_WHOS_ONLINE', 'whos_online.php');
   define('FILENAME_ZONES', 'zones.php');
+
+  define('FILENAME_DOBA_CONFIG', 'doba_configure.php');
+  define('FILENAME_DOBA_PRODUCT_UPLOAD', 'doba_product_upload.php');
+  define('FILENAME_DOBA_ORDER_DOWNLOAD', 'doba_order_download.php');
 ?>

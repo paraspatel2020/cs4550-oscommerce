@@ -114,6 +114,12 @@ define('BOX_LOCALIZATION_CURRENCIES', 'Currencies');
 define('BOX_LOCALIZATION_LANGUAGES', 'Languages');
 define('BOX_LOCALIZATION_ORDERS_STATUS', 'Orders Status');
 
+// DobA box text in includes/boxes/doba.php
+define('BOX_HEADING_DOBA', 'Doba');
+define('BOX_DOBA_CONFIG', 'Configuration');
+define('BOX_DOBA_UPLOAD_PRODUCT_DATA', 'Upload Products');
+define('BOX_DOBA_DOWNLOAD_ORDER_DATA', 'Download Orders');
+
 // javascript messages
 define('JS_ERROR', 'Errors have occured during the process of your form!\nPlease make the following corrections:\n\n');
 
