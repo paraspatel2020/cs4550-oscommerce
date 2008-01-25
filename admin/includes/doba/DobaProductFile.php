@@ -3,6 +3,7 @@
 include_once('doba/DobaProductData.php');
 include_once('doba/DobaProducts.php');
 
+class DobaProductFile {
 	/**
 	 * Default constructor
 	 * @return 
@@ -13,9 +14,10 @@ include_once('doba/DobaProducts.php');
 
 	/**
 	 * Proccess a file and store the files elements in a DobaProduts object
+	 * @static method
 	 * @return 
-	 * @param $file file handle 
-	 * @param $type string
+	 * @param $file string : full path to file on server 
+	 * @param $type string : "tab" or "csv"
 	 */
 	function processFile($file, $type )
 	{
@@ -24,25 +26,27 @@ include_once('doba/DobaProducts.php');
 		$DobaProds = new DobaProducts();
 		$headers;
 		
+		$fp = fopen($file, 'r');
+		
 		if ($type == 'csv')
 		{
 			$delm = ',';			
 		}
 		else 
 		{
-			$delm = '\t';
+			$delm = "\t";
 		}
 		
-		if (!feof($file))
+		if (!feof($fp))
 		{
-			$data = fgets($file);
+			$data = fgets($fp);
 			
 			$headers = explode($delm, $data);			
 		}
 		
-		while(!feof($file)) 
+		while(!feof($fp)) 
 		{ 
-			$data = fgets($file);
+			$data = fgets($fp);
 			
 			$values = explode($delm, $data);
 	
@@ -61,10 +65,13 @@ include_once('doba/DobaProducts.php');
 			 * Products Weight
 			 */
 			
-			$tempDPD->$product_id = $values[(int)array_keys($headers, 'PRODUCT_ID')];
-			$DobaProds .= $tempDPD;
+			$tempDPD->product_id($values[(int)array_keys($headers, 'PRODUCT_ID')]);
+			$DobaProds->addProduct($tempDPD);
 		} 
+		
+		fclose($fp);
+		
 		return $DobaProds;
 	}
-
+}
 ?>
