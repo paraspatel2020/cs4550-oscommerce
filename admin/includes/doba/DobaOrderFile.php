@@ -28,14 +28,14 @@ class DobaOrderFile
 		for ($i = 0; $i<count($orders->$orders); $i++)
 		{
 			echo "\n";
-			echoData($orders->$order_id);
-			echoData($orders->$first_name);
-			echoData($orders->$last_name);
-			echoData($orders->$address);
-			echoData($orders->$city);
-			echoData($orders->$state);
-			echoData($orders->$postal);
-			echoData($orders->$country);
+			echoData($orders[i]->$order_id);
+			echoData($orders[i]->$first_name);
+			echoData($orders[i]->$last_name);
+			echoData($orders[i]->$address);
+			echoData($orders[i]->$city);
+			echoData($orders[i]->$state);
+			echoData($orders[i]->$postal);
+			echoData($orders[i]->$country);
 		}
 	}
 	
