@@ -11,26 +11,25 @@ ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/
   Released under the GNU General Public License
 */
 
+require('includes/application_top.php');
+
 $msg = '';
 if (isset($_POST['submit'])) {
 	require_once('doba/DobaProductFile.php');
+	require_once('doba/DobaInteraction.php');
 	
 	$filename = isset($_FILES['product_file']['name']) ? $_FILES['product_file']['name'] : '';
 	$tmpfile = isset($_FILES['product_file']['tmp_name']) ? $_FILES['product_file']['tmp_name'] : '';
 	$file_type = isset($_POST['file_type']) ? $_POST['file_type'] : '';
+	$file_action = isset($_POST['file_action']) ? $_POST['file_action'] : '';
 
 	$objDobaProducts = DobaProductFile::processFile($tmpfile, $file_type);
-	if (is_a($objDobaProducts, 'DobaProducts')) {
-		echo "<pre>";
-		print_r($objDobaProducts);
-		echo "</pre>";
-		
-		$msg = $filename.' was properly uploaded and processed.  Please view your 
-			   products in the catalog.';
+	if (is_a($objDobaProducts, 'DobaProducts') && DobaInteraction::loadDobaProductsIntoDB( $objDobaProducts, $file_action)) {
+		$msg = $filename.UPLOAD_SUCCESS_MSG;
+	} else {
+		$MSG = UPLOAD_FAILURE_MSG;
 	}
 }
-
-  require('includes/application_top.php');
 ?>
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html <?php echo HTML_PARAMS; ?>>
@@ -75,18 +74,45 @@ if (isset($_POST['submit'])) {
 				<table>
 					<tr>
 						<th><?php echo FORM_PRODUCT_FILE; ?>:</th>
-						<td><input name="product_file" type="file"></td>
+						<td colspan="2"><input name="product_file" type="file"></td>
 					</tr>
 					<tr>
 						<th><?php echo FORM_FILE_TYPE; ?>:</th>
-						<td><select name="file_type">
+						<td colspan="2"><select name="file_type">
 							<option value="tab"><?php echo FORM_FILE_TYPE_TAB; ?></option>
 							<option value="csv"><?php echo FORM_FILE_TYPE_CSV; ?></option>
 						</select></td>
 					</tr>
 					<tr>
+						<th rowspan="2"><?php echo FORM_FILE_ACTION; ?>:</th>
+						<td>
+							<label for="file_action_update">
+								<input type="radio" name="file_action" id="file_action_update" value="update" checked=true> 
+								<?php echo FORM_FILE_ACTION_UPDATE; ?>
+							</label>
+						</td>
+						<td style="padding: 2px 0 0 20px; font-size: 10px; color: #999; text-align: bottom;">
+							<label for="file_action_update">
+								(<?php echo FORM_FILE_ACTION_UPDATE_EXPLAIN; ?>)
+							</label>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="file_action_replace">
+								<input type="radio" name="file_action" id="file_action_replace" value="replace"> 
+								<?php echo FORM_FILE_ACTION_REPLACE; ?>
+							</label>
+						</td>
+						<td style="padding: 2px 0 0 20px; font-size: 10px; color: #999; text-align: bottom;">
+							<label for="file_action_replace">
+								(<?php echo FORM_FILE_ACTION_REPLACE_EXPLAIN; ?>)
+							</label>
+						</td>
+					</tr>
+					<tr>
 						<th>&nbsp;</th>
-						<td><input type="submit" name="submit" value="<?php echo FORM_SUBMIT_FILE; ?>"></td>
+						<td colspan="2"><input type="submit" name="submit" value="<?php echo FORM_SUBMIT_FILE; ?>"></td>
 					</tr>
 				</table>
 			</form>

@@ -24,18 +24,17 @@ class DobaOrderFile
 		 * quantity, and maxexpectedtotal.  Also, is the PONumber the order_id? What is the
 		 * item_id? I can change or add these after clarification.
 		 */
-		echoHeader();
-		for ($i = 0; $i<count($orders->$orders); $i++)
-		{
+		$this->echoHeader();
+		foreach ($orders->orders as $o) {
 			echo "\n";
-			echoData($orders[i]->$order_id);
-			echoData($orders[i]->$first_name);
-			echoData($orders[i]->$last_name);
-			echoData($orders[i]->$address);
-			echoData($orders[i]->$city);
-			echoData($orders[i]->$state);
-			echoData($orders[i]->$postal);
-			echoData($orders[i]->$country);
+			$this->echoData($o->order_id());
+			$this->echoData($o->first_name());
+			$this->echoData($o->last_name());
+			$this->echoData($o->address());
+			$this->echoData($o->city());
+			$this->echoData($o->state());
+			$this->echoData($o->postal());
+			$this->echoData($o->country());
 		}
 	}
 	
