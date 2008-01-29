@@ -48,6 +48,7 @@ class DobaOrders {
 	/**
 	 * @todo make work with db
 	 * Pulls orders by sent to Doba status
+	 * @static method
 	 * @return bool
 	 * @param $status string
 	 */
