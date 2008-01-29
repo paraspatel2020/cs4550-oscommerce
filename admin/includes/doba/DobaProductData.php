@@ -5,6 +5,10 @@ class DobaProductData {
 	 */
 	var $product_id;
 	/**
+	 * @var int
+	 */
+	var $item_id;	
+	/**
 	 * @var string
 	 */
 	var $title;
@@ -24,6 +28,14 @@ class DobaProductData {
 	 * @var string
 	 */
 	var $description;
+	/**
+	 * @var float
+	 */
+	var $price;
+	/**
+	 * @var int
+	 */
+	var $quantity;
 	/**
 	 * @var float
 	 */
