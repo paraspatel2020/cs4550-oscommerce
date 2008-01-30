@@ -39,14 +39,6 @@ class DobaProductData {
 	/**
 	 * @var float
 	 */
-	var $ship_width;
-	/**
-	 * @var float
-	 */
-	var $ship_height;
-	/**
-	 * @var float
-	 */
 	var $ship_weight;
 	/**
 	 * @var float
@@ -72,6 +64,10 @@ class DobaProductData {
 	 * @var timestamp
 	 */
 	var $last_update;
+	/**
+	 * @var string
+	 */
+	var $date_avail;	
 	/**
 	 * @var array
 	 */
