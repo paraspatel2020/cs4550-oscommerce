@@ -22,11 +22,10 @@ class DobaProductFile {
 	function processFile($file, $type )
 	{
 		$delm = '';
-		$tempDPD =  new DobaProductData();
 		$DobaProds = new DobaProducts();
 		$headers;
-		
-		$fp = fopen($file, 'r');
+
+		$fp = fopen($file, 'r');	
 		
 		if ($type == 'csv')
 		{
@@ -36,22 +35,25 @@ class DobaProductFile {
 		{
 			$delm = "\t";
 		}
-		
+
 		if (!feof($fp))
-		{
+		{		
 			$data = fgets($fp);
 			
-			$headers = explode($delm, $data);	
-	
-			array_walk($fruits, 'strtoupper');
+			$tHeaders = explode($delm, $data);	
+
+			foreach($tHeaders as $item)
+			{
+			    $headers[] = strtoupper($item);
+			}	
 		}
 		
 		while(!feof($fp)) 
 		{ 
 			$data = fgets($fp);
-			
+				
 			$values = explode($delm, $data);
-	
+
 			/* Fields to fill in on the osCommerce add product page
 			 * Products Status:   In Stock,  Out of Stock		. Passing the current available in the object, needs to be processed before being added to database
 			 * Date Available									/
@@ -66,24 +68,43 @@ class DobaProductFile {
 			 * Products URL (English, Spanish, Ducth)			/ Leaveing blank
 			 * Products Weight									/
 			 */
+
+/* Known bug!!! ITEM_ID is not being found correctly. This is likely because ITEM_ID is at the end of a line and therefore has the \r\n and these are confusing the search algorithim.*/
+//echo 'values: '.var_dump($headers).'<br><br>';
+
+//$temp = array_keys($headers, 'ITEM_ID ');
+//echo 'Keys \'ITEM_ID\': '.$temp[0].'<br>';
+
+			$tempDPD =  new DobaProductData();
 			
-			$tempDPD->product_id($values[(int)array_keys($headers, 'PRODUCT_ID')]);
-			$tempDPD->item_id($values[(int)array_keys($headers, 'ITEM_ID')]);
-			$tempDPD->title($values[(int)array_keys($headers, 'TITLE')]);
-			$tempDPD->price($values[(int)array_keys($headers, 'MSRP')]);
-			$tempDPD->description(''.$values[(int)array_keys($headers, 'DESCRIPTION')].'<br>'.$values[(int)array_keys($headers, 'DETAILS')]);
-			$tempDPD->quantity($values[(int)array_keys($headers, 'QTY_AVAIL')]);
-			$tempDPD->image_url($values[(int)array_keys($headers, 'IMAGE_URL')]);
-			$tempDPD->ship_weight($values[(int)array_keys($headers, 'WEIGHT')]);
+			$temp = array_keys($headers, 'PRODUCT_ID');
+			$tempDPD->product_id($values[$temp[0]]);
+			$temp = array_keys($headers, 'ITEM_ID ');
+			$tempDPD->item_id($values[$temp[0]]);
+			$temp = array_keys($headers, 'TITLE');
+			$tempDPD->title($values[$temp[0]]);
+			$temp = array_keys($headers, 'MSRP');
+			$tempDPD->price($values[$temp[0]]);
+			$temp = array_keys($headers, 'DESCRIPTION');
+			$tempStr = ''.$values[$temp[0]].'<br>';
+			$temp = array_keys($headers, 'DETAILS');
+			$tempStr = $tempStr.''.$values[$temp[0]];
+			$tempDPD->description($tempStr);
+			$temp = array_keys($headers, 'QTY_AVAIL');
+			$tempDPD->quantity($values[$temp[0]]);
+			$temp = array_keys($headers, 'IMAGE_URL');
+			$tempDPD->image_url($values[$temp[0]]);
+			$temp = array_keys($headers, 'WEIGHT');
+			$tempDPD->ship_weight($values[$temp[0]]);
 			$tempDPD->date_avail(date('Y-m-d'));
-			$tempDPD->product_sku($values[(int)array_keys($headers, 'SKU')]);
-			
-			
+			$temp = array_keys($headers, 'SKU');
+			$tempDPD->product_sku($values[$temp[0]]);
+					
 			$DobaProds->addProduct($tempDPD);
 		} 
 		
 		fclose($fp);
-		
+	
 		return $DobaProds;
 	}
 }
