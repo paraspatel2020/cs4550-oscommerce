@@ -87,6 +87,19 @@ class DobaProductData {
 		
 		return $this->product_id;
 	}
+
+	/**
+	 * Getter setter for $item_id
+	 * @return int
+	 * @param $arg int[optional]
+	 */
+	function item_id($arg=null) {
+		if (!is_null($arg)) {
+			$this->item_id = (int)$arg;
+		}
+		
+		return $this->item_id;
+	}
 	
 	/**
 	 * Getter setter for $title
@@ -153,6 +166,45 @@ class DobaProductData {
 		return $this->description;
 	}
 
+	/**
+	 * Getter setter for $price
+	 * @return float
+	 * @param $arg float[optional]
+	 */
+	function price($arg=null) {
+		if (!is_null($arg)) {
+			$this->price = (float)$arg;
+		}
+		
+		return $this->price;
+	}
+
+	/**
+	 * Getter setter for $quantity
+	 * @return int
+	 * @param $arg int[optional]
+	 */
+	function quantity($arg=null) {
+		if (!is_null($arg)) {
+			$this->quantity = (int)$arg;
+		}
+		
+		return $this->quantity;
+	}	
+
+	/**
+	 * Getter setter for $ship_weight
+	 * @return float
+	 * @param $arg float[optional]
+	 */
+	function ship_weight($arg=null) {
+		if (!is_null($arg)) {
+			$this->ship_weight = (float)$arg;
+		}
+		
+		return $this->ship_weight;
+	}
+			
 	/**
 	 * Getter setter for $ship_width
 	 * @return float
@@ -257,6 +309,19 @@ class DobaProductData {
 		return $this->last_update;
 	}
 
+	/**
+	 * Getter setter for $date_avail
+	 * @return string
+	 * @param $arg string[optional]
+	 */
+	function date_avail($arg=null) {
+		if (!is_null($arg)) {
+			$this->date_avail = trim($arg);
+		}
+		
+		return $this->date_avail;
+	}
+	
 	/**
 	 * Getter setter for $items
 	 * @return array
