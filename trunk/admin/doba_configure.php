@@ -1,4 +1,5 @@
 <?php
+ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/admin/includes/');
 /*
   $Id: doba_configure.php,v 1.0 2008/01/17 14:40:27 hpdl Exp $
 

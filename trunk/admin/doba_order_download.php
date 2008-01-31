@@ -10,6 +10,7 @@ ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/
 
   Released under the GNU General Public License
 */
+require('includes/application_top.php');
 
 $downloaded = true;
 if (isset($_POST['ordergroup'])) {
@@ -20,7 +21,8 @@ if (isset($_POST['ordergroup'])) {
 	$objDobaOrders = new DobaOrders();
 	if ($objDobaOrders->loadOrders($ordergroup)) {
 		$filename = 'orders_'.date('YmdHis').'.tab';
-		header('Content-Type: application/octet-stream');
+		// make this header replace previous headers
+		header('Content-Type: application/octet-stream', true);
 		header('Content-Disposition: attachment; '
        				.'filename="'.$filename.'"');
 		$objDobaOrderFile = new DobaOrderFile();
@@ -29,8 +31,6 @@ if (isset($_POST['ordergroup'])) {
 	}
 	$downloaded = false;
 }
-
-require('includes/application_top.php');
 
 $msg = '';
 if (!$downloaded) {
