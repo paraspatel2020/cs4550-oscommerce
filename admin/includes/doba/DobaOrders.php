@@ -54,6 +54,13 @@ class DobaOrders {
 	 */
 	function loadOrders($status)
 	{
+		$orders = array();
+  		$orders_query = tep_db_query("select * from " . TABLE_ORDERS);
+  		while ($o = tep_db_fetch_array($orders_query)) {
+ 			$i = new DobaOrderInfo();
+			
+ 		}
+			
 		return true;
 	}
 }
