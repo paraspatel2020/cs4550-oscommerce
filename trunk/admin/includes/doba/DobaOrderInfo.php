@@ -4,7 +4,7 @@ class DobaOrderInfo
 	/**
 	 * @var int
 	 */
-	var $orders_id;
+	var $po_number;
 	
 	/**
 	 * @var string
@@ -19,7 +19,12 @@ class DobaOrderInfo
 	/**
 	 * @var string
 	 */
-	var $address;
+	var $address1;
+	
+	/**
+	 * @var string
+	 */
+	var $address2;
 
 	/**
 	 * @var string
@@ -42,25 +47,35 @@ class DobaOrderInfo
 	var $country;
 
 	/**
-	 * @var array
+	 * @var int
 	 */
-	var $items = array();
+	var $item_id;
+	
+	/**
+	 * @var int
+	 */
+	var $quantity;
+	
+	/**
+	 * @var float
+	 */
+	var $max_expected_total;
 	
 	function DobaOrderInfo() {}
 	
 	/**
-	 * Getter setter for $orders_id
+	 * Getter setter for $po_number
 	 * @return int
 	 * @param $arg int[optional]
 	 */
-	function orders_id($arg = null) 
+	function po_number($arg = null) 
 	{
 		if (!is_null($arg)) 
 		{
-			$this->orders_id = intval($arg);
+			$this->po_number = intval($arg);
 		}
 		
-		return $this->orders_id;
+		return intval($this->po_number);
 	}
 	
 	/**
@@ -75,7 +90,7 @@ class DobaOrderInfo
 			$this->first_name = trim($arg);
 		}
 		
-		return $this->first_name;
+		return trim($this->first_name);
 	}
 
 	/**
@@ -90,22 +105,37 @@ class DobaOrderInfo
 			$this->last_name = trim($arg);
 		}
 		
-		return $this->last_name;
+		return trim($this->last_name);
 	}
 
 	/**
-	 * Getter setter for $address
+	 * Getter setter for $address1
 	 * @return string
 	 * @param $arg string[optional]
 	 */
-	function address($arg = null)
+	function address1($arg = null)
 	{
 		if (!is_null($arg))
 		{
-			$this->address = trim($arg);
+			$this->address1 = trim($arg);
 		}
 		
-		return $this->address;
+		return trim($this->address1);
+	}
+	
+	/**
+	 * Getter setter for $address2
+	 * @return string
+	 * @param $arg string[optional]
+	 */
+	function address2($arg = null)
+	{
+		if (!is_null($arg))
+		{
+			$this->address2 = trim($arg);
+		}
+		
+		return trim($this->address2);
 	}
 
 	/**
@@ -120,7 +150,7 @@ class DobaOrderInfo
 			$this->city = trim($arg);
 		}
 		
-		return $this->city;
+		return trim($this->city);
 	}
 
 	/**
@@ -135,7 +165,7 @@ class DobaOrderInfo
 			$this->state = trim($arg);
 		}
 		
-		return $this->state;
+		return trim($this->state);
 	}
 
 	/**
@@ -150,7 +180,7 @@ class DobaOrderInfo
 			$this->postal = trim($arg);
 		}
 		
-		return $this->postal;
+		return trim($this->postal);
 	}
 
 	/**
@@ -165,21 +195,73 @@ class DobaOrderInfo
 			$this->country = trim($arg);
 		}
 		
-		return $this->country;
+		return trim($this->country);
 	}
 
 	/**
-	 * Getter setter for $items
-	 * @return array
-	 * @param $arg array[optional]
+	 * Getter setter for $item_id
+	 * @return int
+	 * @param $arg int[optional]
 	 */
-	function items($arg=null) {
-		if (!is_null($arg) && is_array($arg)) {
-			$this->items = $arg;
+	function item_id($arg=null) {
+		if (!is_null($arg)) {
+			$this->item_id = intval($arg);
 		}
 		
-		return $this->items;
-	}	
+		return intval($this->item_id);
+	}
+	
+	/**
+	 * Getter setter for $quantity
+	 * @return int
+	 * @param $arg int[optional]
+	 */
+	function quantity($arg=null) {
+		if (!is_null($arg)) {
+			$this->quantity = intval($arg);
+		}
+		
+		return intval($this->quantity);
+	}
+	
+	/**
+	 * Getter setter for $max_expected_total
+	 * @return int
+	 * @param $arg int[optional]
+	 */
+	function max_expected_total($arg=null) {
+		if (!is_null($arg)) {
+			$this->max_expected_total = intval($arg);
+		}
+		
+		return floatval($this->max_expected_total);
+	}			
+	
+	/**
+	 * Take a full name and split it into FistName and LastName.
+	 * The LastName will always be the last word in the name.
+	 * The FirstName will contain all other names.  i.e. FirstName, MiddleInitial, etc.
+	 * 
+	 * @param string $name
+	 * @return array(FirstName, LastName)
+	 */
+	function name_to_parts($name) {
+		$name = trim($name);
+		$ret = array(
+			'FirstName' => '',
+			'LastName' => ''
+		);
+		$parts = explode(' ', $name);
+		if (count($parts) > 0) {
+			$ret['LastName'] = $parts[count($parts)-1];
+			for ($i=0; $i<count($parts)-1; ++$i) {
+				$ret['FirstName'] .= ' '.$parts[$i];
+			}
+			$ret['FirstName'] = trim($ret['FirstName']);
+		}
+		
+		return $ret;
+	}
 }//end class DobaOrderInfo
 
 ?>

@@ -16,7 +16,7 @@ class DobaOrderFile
 	 * @return 
 	 * @param $orders DobaOrders
 	 */
-	function processData (DobaOrders $orders)
+	function processData ($orders)
 	{
 		/*
 		 * Looking at the example order file, it looks like we did not declare all the
@@ -26,15 +26,19 @@ class DobaOrderFile
 		 */
 		$this->echoHeader();
 		foreach ($orders->orders as $o) {
-			echo "\n";
-			$this->echoData($o->order_id());
+			$this->echoData($o->po_number());
 			$this->echoData($o->first_name());
 			$this->echoData($o->last_name());
-			$this->echoData($o->address());
+			$this->echoData($o->address1());
+			$this->echoData($o->address2());
 			$this->echoData($o->city());
 			$this->echoData($o->state());
 			$this->echoData($o->postal());
 			$this->echoData($o->country());
+			$this->echoData($o->item_id());
+			$this->echoData($o->quantity());
+			$this->echoData($o->max_expected_total());
+			echo "\n";
 		}
 	}
 	
@@ -43,8 +47,11 @@ class DobaOrderFile
 	 * @return void
 	 * @param $data String
 	 */
-	function echoData(string $data)
+	function echoData($data)
 	{
+		if (is_null($data)) {
+			$data = ' ';
+		}
 		echo "$data\t";
 	}
 	
