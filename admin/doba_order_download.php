@@ -13,20 +13,28 @@ ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/
 require('includes/application_top.php');
 
 $downloaded = true;
+require_once('doba/DobaOrders.php');	
+require_once('doba/DobaLog.php');
+		
 if (isset($_POST['ordergroup'])) {
-	require_once('doba/DobaOrders.php');
 	require_once('doba/DobaOrderFile.php');
 	
 	$ordergroup = trim($_POST['ordergroup']);
-	$objDobaOrders = new DobaOrders();
-	if ($objDobaOrders->loadOrders($ordergroup)) {
-		$filename = 'orders_'.date('YmdHis').'.tab';
+	$objDobaOrders = DobaOrders::loadOrders($ordergroup);
+	if (is_a($objDobaOrders, 'DobaOrders')) {
+		$now = time();
+		$filename = 'orders_'.date('YmdHis', $now).'.tab';
 		// make this header replace previous headers
 		header('Content-Type: application/octet-stream', true);
 		header('Content-Disposition: attachment; '
        				.'filename="'.$filename.'"');
 		$objDobaOrderFile = new DobaOrderFile();
 		$objDobaOrderFile->processData($objDobaOrders);
+		
+		if ($ordergroup == 'new') {
+			DobaLog::logOrderDownload($objDobaOrders, $filename, $now);
+		}
+		
 		exit();
 	}
 	$downloaded = false;
@@ -37,12 +45,12 @@ if (!$downloaded) {
 	$msg = FILE_DOWNLOAD_ERROR;
 }
 
-$cnt_new_orders = 0;
-$cnt_all_orders = 0;
-$cnt_submitted_orders = 0;
-$cnt_unsubmitted_orders = 0;
+$order_cnt_new = DobaOrders::getOrderCount('new');
+$order_cnt_all = DobaOrders::getOrderCount('all');
+$order_cnt_submitted = DobaOrders::getOrderCount('submitted');
+$order_cnt_unsubmitted = DobaOrders::getOrderCount('unsubmitted');
 
-$download_history = array();
+$download_history = DobaLog::getLogHistorySummary('order');
 ?>
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html <?php echo HTML_PARAMS; ?>>
@@ -51,6 +59,15 @@ $download_history = array();
 <title><?php echo TITLE; ?></title>
 <link rel="stylesheet" type="text/css" href="includes/stylesheet.css">
 <script language="javascript" src="includes/general.js"></script>
+
+<style type="text/css">
+	table.data { border-collapse: collapse; }
+	table.data td,
+	table.data th { padding: 4px 10px; border: 1px solid #d1d3d4; }
+	table.data th { background: #d1d3d4; }
+	table.data tr.disabled td { color: #999; }
+	table.data tr.noborder td { border: none; padding-top: 15px; }
+</style>
 </head>
 <body marginwidth="0" marginheight="0" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" bgcolor="#FFFFFF" onload="SetFocus();">
 <div id="spiffycalendar" class="text"></div>
@@ -84,62 +101,65 @@ $download_history = array();
 				}
 			?>
 			<form action="doba_order_download.php" method="post">
-				<table>
-					<tr>
+				<table class="data">
+					<tr <?php if ($order_cnt_new == 0) { echo ' class="disabled"'; } ?>>
 						<td>
 							<label for="ordergroup_new">
-								<input type="radio" name="ordergroup" id="ordergroup_new" value="new" checked="true">
+								<input type="radio" name="ordergroup" id="ordergroup_new" value="new" checked="true" <?php if ($order_cnt_new == 0) { echo ' disabled'; } ?>>
 							</label>
 						</td>
 						<td>
 							<label for="ordergroup_new"><?php echo ORDERGROUP_NEW; ?></label>
 						</td>
-						<td>(<?php echo $cnt_new_orders.' '.AVAILABLE; ?>)</td>
+						<td>(<?php echo $order_cnt_new.' '.AVAILABLE; ?>)</td>
 					</tr>
-					<tr>
+					<tr <?php if ($order_cnt_all == 0) { echo ' class="disabled"'; } ?>>
 						<td>
 							<label for="ordergroup_all">
-								<input type="radio" name="ordergroup" id="ordergroup_all" value="all">
+								<input type="radio" name="ordergroup" id="ordergroup_all" value="all" <?php if ($order_cnt_all == 0) { echo ' disabled'; } ?>>
 							</label>
 						</td>
 						<td>
 							<label for="ordergroup_all"><?php echo ORDERGROUP_ALL; ?></label>
 						</td>
-						<td>(<?php echo $cnt_all_orders.' '.AVAILABLE; ?>)</td>
+						<td>(<?php echo $order_cnt_all.' '.AVAILABLE; ?>)</td>
 					</tr>
-					<tr>
+					<tr <?php if ($order_cnt_submitted == 0) { echo ' class="disabled"'; } ?>>
 						<td>
 							<label for="ordergroup_submitted">
-								<input type="radio" name="ordergroup" id="ordergroup_submitted" value="submitted">
+								<input type="radio" name="ordergroup" id="ordergroup_submitted" value="submitted" <?php if ($order_cnt_submitted == 0) { echo ' disabled'; } ?>>
 							</label>
 						</td>
 						<td>
 							<label for="ordergroup_submitted"><?php echo ORDERGROUP_SUBMITTED; ?></label>
 						</td>
-						<td>(<?php echo $cnt_submitted_orders.' '.AVAILABLE; ?>)</td>
+						<td>(<?php echo $order_cnt_submitted.' '.AVAILABLE; ?>)</td>
 					</tr>
-					<tr>
+					<tr <?php if ($order_cnt_unsubmitted == 0) { echo ' class="disabled"'; } ?>>
 						<td>
 							<label for="ordergroup_unsubmitted">
-								<input type="radio" name="ordergroup" id="ordergroup_unsubmitted" value="unsubmitted">
+								<input type="radio" name="ordergroup" id="ordergroup_unsubmitted" value="unsubmitted" <?php if ($order_cnt_unsubmitted == 0) { echo ' disabled'; } ?>>
 							</label>
 						</td>
 						<td>
 							<label for="ordergroup_unsubmitted"><?php echo ORDERGROUP_UNSUBMITTED; ?></label>
 						</td>
-						<td>(<?php echo $cnt_unsubmitted_orders.' '.AVAILABLE; ?>)</td>
+						<td>(<?php echo $order_cnt_unsubmitted.' '.AVAILABLE; ?>)</td>
 					</tr>
-					<tr>
-						<td colspan="2"><input type="submit" name="submit" value="<?php echo FORM_DOWNLOAD_FILE; ?>"></td>
+					<tr class="noborder">
+						<td colspan="3"><input type="submit" name="submit" value="<?php echo FORM_DOWNLOAD_FILE; ?>"></td>
 					</tr>					
 				</table>
 			</form>
 		
 			<p><strong><?php echo DOWNLOAD_HISTORY; ?></strong></p>
-			<table>
+			<table class="data">
 				<thead>
 					<tr>
 						<th><?php echo TABLE_HEAD_DATE; ?></th>
+						<th><?php echo TABLE_HEAD_XFER_METHOD; ?></th>
+						<th><?php echo TABLE_HEAD_FILENAME; ?></th>
+						<th><?php echo TABLE_HEAD_API_RESPONSE; ?></th>
 						<th><?php echo TABLE_HEAD_ORDER_CNT; ?></th>
 					</tr>
 				</thead>
@@ -150,14 +170,17 @@ $download_history = array();
 					?>
 							<tr>
 								<td><?php echo $dh['ymdt']; ?></td>
-								<td><?php echo $dh['cnt']; ?></td>							
+								<td><?php echo $dh['xfer_method']; ?></td>
+								<td><?php echo $dh['filename']; ?></td>
+								<td><?php echo $dh['api_response']; ?></td>
+								<td><?php echo $dh['order_cnt']; ?></td>							
 							</tr>
 					<?php 
 							} 
 						} else {
 					?>
 						<tr>
-							<td colspan="2" style="color: #999;">
+							<td colspan="5" style="color: #999;">
 								<?php echo MSG_NO_HISTORY; ?>
 							</td>
 						</tr>
