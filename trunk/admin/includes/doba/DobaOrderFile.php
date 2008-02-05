@@ -61,7 +61,7 @@ class DobaOrderFile
 	 */
 	function echoHeader ()
 	{
-		echo "PONumber\tFirstname\tLastname\taddress1\taddress2\tcity\tstate\tpostal\tcountry\titemid\tquantiy\tmaxexpectedtotal\n";
+		echo "PONumber\tFirstname\tLastname\taddress1\taddress2\tcity\tstate\tpostal\tcountry\titemid\tquantity\tmaxexpectedtotal\n";
 	}
 }
 
