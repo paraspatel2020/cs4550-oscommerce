@@ -13,14 +13,15 @@ ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/
 require('includes/application_top.php');
 
 $downloaded = true;
-require_once('doba/DobaOrders.php');	
+require_once('doba/DobaOrders.php');
+require_once('doba/DobaInteraction.php');	
 require_once('doba/DobaLog.php');
 		
 if (isset($_POST['ordergroup'])) {
 	require_once('doba/DobaOrderFile.php');
 	
 	$ordergroup = trim($_POST['ordergroup']);
-	$objDobaOrders = DobaOrders::loadOrders($ordergroup);
+	$objDobaOrders = DobaInteraction::loadOrders($ordergroup);
 	if (is_a($objDobaOrders, 'DobaOrders')) {
 		$now = time();
 		$filename = 'orders_'.date('YmdHis', $now).'.tab';
@@ -45,10 +46,10 @@ if (!$downloaded) {
 	$msg = FILE_DOWNLOAD_ERROR;
 }
 
-$order_cnt_new = DobaOrders::getOrderCount('new');
-$order_cnt_all = DobaOrders::getOrderCount('all');
-$order_cnt_submitted = DobaOrders::getOrderCount('submitted');
-$order_cnt_unsubmitted = DobaOrders::getOrderCount('unsubmitted');
+$order_cnt_new = DobaInteraction::getOrderCount('new');
+$order_cnt_all = DobaInteraction::getOrderCount('all');
+$order_cnt_submitted = DobaInteraction::getOrderCount('submitted');
+$order_cnt_unsubmitted = DobaInteraction::getOrderCount('unsubmitted');
 
 $download_history = DobaLog::getLogHistorySummary('order');
 ?>

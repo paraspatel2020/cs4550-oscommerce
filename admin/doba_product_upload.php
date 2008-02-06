@@ -21,10 +21,9 @@ if (isset($_POST['submit'])) {
 	$filename = isset($_FILES['product_file']['name']) ? $_FILES['product_file']['name'] : '';
 	$tmpfile = isset($_FILES['product_file']['tmp_name']) ? $_FILES['product_file']['tmp_name'] : '';
 	$file_type = isset($_POST['file_type']) ? $_POST['file_type'] : '';
-	$file_action = isset($_POST['file_action']) ? $_POST['file_action'] : '';
-
+	
 	$objDobaProducts = DobaProductFile::processFile($tmpfile, $file_type);
-	if (is_a($objDobaProducts, 'DobaProducts') && DobaInteraction::loadDobaProductsIntoDB( $objDobaProducts, $file_action)) {
+	if (is_a($objDobaProducts, 'DobaProducts') && DobaInteraction::loadDobaProductsIntoDB( $objDobaProducts )) {
 		$msg = $filename.UPLOAD_SUCCESS_MSG;
 	} else {
 		$MSG = UPLOAD_FAILURE_MSG;
@@ -82,33 +81,6 @@ if (isset($_POST['submit'])) {
 							<option value="tab"><?php echo FORM_FILE_TYPE_TAB; ?></option>
 							<option value="csv"><?php echo FORM_FILE_TYPE_CSV; ?></option>
 						</select></td>
-					</tr>
-					<tr>
-						<th rowspan="2"><?php echo FORM_FILE_ACTION; ?>:</th>
-						<td>
-							<label for="file_action_update">
-								<input type="radio" name="file_action" id="file_action_update" value="update" checked=true> 
-								<?php echo FORM_FILE_ACTION_UPDATE; ?>
-							</label>
-						</td>
-						<td style="padding: 2px 0 0 20px; font-size: 10px; color: #999; text-align: bottom;">
-							<label for="file_action_update">
-								(<?php echo FORM_FILE_ACTION_UPDATE_EXPLAIN; ?>)
-							</label>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<label for="file_action_replace">
-								<input type="radio" name="file_action" id="file_action_replace" value="replace"> 
-								<?php echo FORM_FILE_ACTION_REPLACE; ?>
-							</label>
-						</td>
-						<td style="padding: 2px 0 0 20px; font-size: 10px; color: #999; text-align: bottom;">
-							<label for="file_action_replace">
-								(<?php echo FORM_FILE_ACTION_REPLACE_EXPLAIN; ?>)
-							</label>
-						</td>
 					</tr>
 					<tr>
 						<th>&nbsp;</th>
