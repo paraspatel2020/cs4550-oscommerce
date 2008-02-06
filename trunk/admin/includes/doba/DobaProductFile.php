@@ -44,9 +44,12 @@ class DobaProductFile {
 
 			foreach($tHeaders as $item)
 			{
-			    $headers[] = strtoupper($item);
+			    $headers[] = strtoupper(trim($item));
 			}	
 		}
+		
+		echo "<pre>";
+		print_r($headers);
 		
 		while(!feof($fp)) 
 		{ 
@@ -72,14 +75,16 @@ class DobaProductFile {
 /* Known bug!!! ITEM_ID is not being found correctly. This is likely because ITEM_ID is at the end of a line and therefore has the \r\n and these are confusing the search algorithim.*/
 //echo 'values: '.var_dump($headers).'<br><br>';
 
-//$temp = array_keys($headers, 'ITEM_ID ');
+//$temp = array_keys($headers, 'ITEM_ID');
 //echo 'Keys \'ITEM_ID\': '.$temp[0].'<br>';
+//echo 'Val \'ITEM VAL\': '.$values[$temp[0]].'<br>';
+			print_r($values);
 
 			$tempDPD =  new DobaProductData();
 			
 			$temp = array_keys($headers, 'PRODUCT_ID');
 			$tempDPD->product_id($values[$temp[0]]);
-			$temp = array_keys($headers, 'ITEM_ID ');
+			$temp = array_keys($headers, 'ITEM_ID');
 			$tempDPD->item_id($values[$temp[0]]);
 			$temp = array_keys($headers, 'TITLE');
 			$tempDPD->title($values[$temp[0]]);
@@ -104,6 +109,9 @@ class DobaProductFile {
 		} 
 		
 		fclose($fp);
+		
+		var_dump($DobaProds);
+		echo "</pre>";
 	
 		return $DobaProds;
 	}
