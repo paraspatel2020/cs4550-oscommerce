@@ -110,7 +110,7 @@ class DobaOrders {
 	 */
 	function getOrderCount($status) {
 		$sql = 'select 
-					count(*) as cnt
+					distinct concat(' . TABLE_ORDERS_PRODUCTS . '.orders_id, "-", ' . TABLE_ORDERS_PRODUCTS . '.products_id) as idx 
 				from 
 					' . TABLE_ORDERS . '
 					join ' . TABLE_ORDERS_PRODUCTS . ' on ' . TABLE_ORDERS_PRODUCTS . '.orders_id=' . TABLE_ORDERS . '.orders_id 
@@ -126,9 +126,9 @@ class DobaOrders {
 		echo "<!-- ".$sql." -->";
 				
 		$cnt_query = tep_db_query($sql);
-  		$o = tep_db_fetch_array($cnt_query);
-		
-		return isset($o['cnt']) ? intval($o['cnt']) : 0;
+  		$cnt = tep_db_num_rows($cnt_query);
+			
+		return $cnt;
 	}
 }
 ?>

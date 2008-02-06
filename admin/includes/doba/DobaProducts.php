@@ -13,7 +13,7 @@ class DobaProducts {
 	 */
 	function addProduct($objDobaProductData) {
 		if (is_a($objDobaProductData, 'DobaProductData')) {
-			$this->products[$objDobaProductData->product_id()] = $objDobaProductData;
+			$this->products[$objDobaProductData->item_id()] = $objDobaProductData;
 			return true;
 		}
 		return false;
@@ -22,10 +22,10 @@ class DobaProducts {
 	/**
 	 * Check to see if the specified product exists
 	 * @return bool
-	 * @param $product_id int
+	 * @param $key int
 	 */
-	function productExists($product_id) {
-		return (isset($this->products[intval($product_id)]));
+	function productExists($key) {
+		return (isset($this->products[intval($key)]));
 	}
 	
 	/**
@@ -33,9 +33,9 @@ class DobaProducts {
 	 * @return bool
 	 * @param $product_id int
 	 */
-	function removeProduct($product_id) {
-		if ($this->productExists($product_id)) {
-			unset($this->products[$product_id]);
+	function removeProduct($key) {
+		if ($this->productExists($key)) {
+			unset($this->products[$key]);
 			return true;
 		}
 		return false;
