@@ -1,9 +1,49 @@
 <?php
+$img_data = array();
+
 class DobaInteraction {
 	
 	/**
-	 * Load all of the supplied products into the database.  This will update any existing entries and add any new entries.  
-	 * It is up to the user to manage the discontinuance of products.
+	 * Take the requested image source and save it to the server, then return the 
+	 * path to the image.
+	 * @return $str : the relative path to the image in the images directory
+	 * @param $src string : the url to the image
+	 * @param $product_id int : the id of the product in the oscommerce db
+	 */
+	function processImage( $src ) {
+		global $img_data;
+		
+		$ref = '';
+		
+		if (isset($img_data[$src])) {
+			return $img_data[$src];
+		}
+		
+		if (!empty($src)) {
+			$data = file_get_contents($src, FILE_BINARY);
+			if (!empty($data)) {
+				$i_parts = explode('/', $src);
+				$ref = 'doba___' . $i_parts[count($i_parts)-2] . '_' . $i_parts[count($i_parts)-1];
+				$new_file = $_SERVER['DOCUMENT_ROOT'] . '/images/' . $ref;
+				if (($fh = fopen($new_file, 'w')) !== false) {
+					if (fwrite($fh, $data) === false) {
+						$ref = '';
+					}
+				} else {
+					$ref = '';
+				}
+			}
+		}
+		
+		$img_data[$src] = $ref;		
+		
+		return $ref;
+	}
+	
+	/**
+	 * Load all of the supplied products into the database.  This will update any 
+	 * existing entries and add any new entries.  It is up to the user to manage 
+	 * the discontinuance of products.
 	 * @static : this is a static method
 	 * @return bool : True if the products were succssfully loaded.
 	 * @param $products DobaProducts
@@ -15,7 +55,7 @@ class DobaInteraction {
 						products_status, products_tax_class_id, manufacturers_id) 
 					values ';
 
-			$can_insert = false;			
+			$can_insert = false;
 			foreach ($products->products as $prod) {
 				if ($can_insert) {
 					$sql .= ', ';
@@ -28,29 +68,13 @@ class DobaInteraction {
 				if (empty($img_url)) {
 					$img_url = $prod->thumb_url();
 				}
-				$products_image = '';
-				if (!empty($img_url)) {
-					$data = file_get_contents($img_url, FILE_BINARY);
-					if (!empty($data)) {
-						$i_parts = explode('/', $img_url);
-						$products_image = 'doba/' . $i_parts[count($i_parts)-1];
-						$new_file = $_SERVER['DOCUMENT_ROOT'] . 'images/' . $products_image;
-						$fh = fopen($new_file, 'w');
-						if ($fh !== false) {
-							if (!fwrite($fw, $data)) {
-								$products_image = '';
-							}
-						} else {
-							$products_image = '';
-						}
-					}
-				}
+				$products_image = DobaInteraction::processImage($img_url, $products_id);
 				$products_price = $prod->price();
 				$products_last_modified = 'now()';
 				$products_weight = $prod->ship_weight();
 				$products_status = ($prod->quantity() > 0) ? 1 : 0;
 				$products_tax_class_id = 1;
-				$manufacturers_id = '';
+				$manufacturers_id = 'NULL';
 				
 				$sql .= '(' . $products_id . ', ' . $products_quantity . ', "' . $products_model . '", "' . $products_image . '", ' . $products_price . ', 
 						' . $products_last_modified . ', ' . $products_weight . ', ' . $products_status . ', ' . $products_tax_class_id . ', 
@@ -58,12 +82,10 @@ class DobaInteraction {
 			}
 			
 			if ($can_insert) {
-				echo "<p>".$sql."</p>";
-				//tep_db_query($sql);
+				tep_db_query($sql);
 				
 				$sql = 'update ' . TABLE_PRODUCTS . ' set products_date_added=now(), products_date_available=now() where products_date_added is NULL';
-				echo "<p>".$sql."</p>";
-				//tep_db_query($sql);
+				tep_db_query($sql);
 				
 				return true;
 			}
@@ -73,7 +95,6 @@ class DobaInteraction {
 	}
 	
 	/**
-	 * @todo make work with db
 	 * Pulls orders by sent to Doba status
 	 * @static method
 	 * @return DobaOrders
