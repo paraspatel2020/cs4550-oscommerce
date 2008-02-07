@@ -14,6 +14,62 @@ class DobaProductFile {
 	}
 	
 	/**
+	 * Parse the line by the given delimiter and return an array of elements
+	 * @static method
+	 * @return array
+	 * @param $data string : the line of data to parse
+	 * @param $delm string : the delimiter to parse by
+	 */
+	function parseLine( $data, $delm ) {
+		$values = array();		
+		$addCom = false;
+		$cnt =0;
+			
+		for ($x=0; $x < strlen($data); $x++) {
+			$chr = $data[$x];
+
+			if ($addCom) {
+				if ($chr == '"') {
+					$addCom = false;
+					$values[$cnt] = $values[$cnt].$chr;
+				} else if ($chr == $delm) {
+					$values[$cnt] = $values[$cnt].$chr;
+				} else {
+					$values[$cnt] = $values[$cnt].$chr;
+				}
+			} else {
+				if ($chr == '"') {
+					$addCom = true;
+					$values[$cnt] = $values[$cnt].$chr;	
+				} else if ($chr == $delm) {
+					$cnt++;
+				} else {
+					$values[$cnt] = $values[$cnt].$chr;
+				}					
+			}
+		}
+		
+		return $values;
+	}
+	
+	/**
+	 * Take a string and remove the quotes on either end of the string, if they exist.
+	 * @static method
+	 * @return string
+	 * @param $str string
+	 */
+	function pruneQuotes( $str ) {
+		$str = trim($str);
+		if (strpos($str, '"') === 0) {
+			$str = substr($str, 1, strlen($str)-2);
+		}
+		
+		return $str;
+	}
+	
+	// "123"
+	
+	/**
 	 * Proccess a file and store the files elements in a DobaProduts object
 	 * @static method
 	 * @return 
@@ -28,14 +84,7 @@ class DobaProductFile {
 
 		$fp = fopen($file, 'r');	
 		
-		if ($type == 'csv')
-		{
-			$delm = ',';			
-		}
-		else 
-		{
-			$delm = "\t";
-		}
+		$delm = ($type == 'csv') ? ',' : "\t";
 
 		if (!feof($fp))
 		{		
@@ -49,55 +98,9 @@ class DobaProductFile {
 			}	
 		}
 		
-		//echo "<pre>";
-		//print_r($headers);
-		
 		while(!feof($fp)) 
 		{ 
-			$data = fgets($fp);
-
-			//$values = explode($delm, $data);	
-			$values = array();		
-			$addCom = false;
-			$cnt =0;
-			
-			for ($x =0; $x < strlen($data); $x++)
-			{
-				$chr = $data[$x];
-
-				if ($addCom)
-				{
-					if ($chr == '"')
-					{
-						$addCom = false;
-						$values[$cnt] = $values[$cnt].$chr;
-					}
-					else if ($chr == $delm)
-					{
-						$values[$cnt] = $values[$cnt].$chr;
-					}
-					else
-					{
-						$values[$cnt] = $values[$cnt].$chr;
-					}
-				}
-				else
-				{
-					if ($chr == '"')
-					{
-						$addCom = true;
-						$values[$cnt] = $values[$cnt].$chr;	
-					}
-					else if ($chr == $delm)
-					{
-						$cnt++;
-					}					
-					else
-					{
-						$values[$cnt] = $values[$cnt].$chr;
-					}					
-				}
-			}
+			$values = DobaProductFile::parseLine( fgets($fp), $delm );
 			
 			/* Fields to fill in on the osCommerce add product page
 			 * Products Status:   In Stock,  Out of Stock		. Passing the current available in the object, needs to be processed before being added to database
@@ -114,46 +117,47 @@ class DobaProductFile {
 			 * Products Weight									/
 			 */
 
-/* Known bug!!! ITEM_ID is not being found correctly. This is likely because ITEM_ID is at the end of a line and therefore has the \r\n and these are confusing the search algorithim.*/
-//echo 'values: '.var_dump($headers).'<br><br>';
-
-//$temp = array_keys($headers, 'ITEM_ID');
-//echo 'Keys \'ITEM_ID\': '.$temp[0].'<br>';
-//echo 'Val \'ITEM VAL\': '.$values[$temp[0]].'<br>';
-
 			$tempDPD =  new DobaProductData();
 			
 			$temp = array_keys($headers, 'PRODUCT_ID');
 			$tempDPD->product_id($values[$temp[0]]);
+			
 			$temp = array_keys($headers, 'ITEM_ID');
 			$tempDPD->item_id($values[$temp[0]]);
+			
 			$temp = array_keys($headers, 'TITLE');
-			$tempDPD->title($values[$temp[0]]);
+			$tempDPD->title(DobaProductFile::pruneQuotes($values[$temp[0]]));
+			
 			$temp = array_keys($headers, 'MSRP');
 			$tempDPD->price($values[$temp[0]]);
+			
 			$temp = array_keys($headers, 'DESCRIPTION');
-			$tempStr = ''.$values[$temp[0]].'<br>';
+			$descr = DobaProductFile::pruneQuotes($values[$temp[0]]);
 			$temp = array_keys($headers, 'DETAILS');
-			$tempStr = $tempStr.''.$values[$temp[0]];
-			$tempDPD->description($tempStr);
+			$details = DobaProductFile::pruneQuotes($values[$temp[0]]);
+			if (!empty($descr)) {
+				$descr .= '<br><br>';
+			}
+			$descr .= $details;
+			$tempDPD->description($descr);
+			
 			$temp = array_keys($headers, 'QTY_AVAIL');
 			$tempDPD->quantity($values[$temp[0]]);
+			
 			$temp = array_keys($headers, 'IMAGE_URL');
-			$tempDPD->image_url($values[$temp[0]]);
+			$tempDPD->image_url(DobaProductFile::pruneQuotes($values[$temp[0]]));
+			
 			$temp = array_keys($headers, 'WEIGHT');
 			$tempDPD->ship_weight($values[$temp[0]]);
-			$tempDPD->date_avail(date('Y-m-d'));
+			
 			$temp = array_keys($headers, 'SKU');
-			$tempDPD->product_sku($values[$temp[0]]);
+			$tempDPD->product_sku(DobaProductFile::pruneQuotes($values[$temp[0]]));
 					
 			$DobaProds->addProduct($tempDPD);
 		} 
 		
 		fclose($fp);
 		
-		//var_dump($DobaProds);
-		//echo "</pre>";
-	
 		return $DobaProds;
 	}		
 }

@@ -13,8 +13,11 @@ class DobaProducts {
 	 */
 	function addProduct($objDobaProductData) {
 		if (is_a($objDobaProductData, 'DobaProductData')) {
-			$this->products[$objDobaProductData->item_id()] = $objDobaProductData;
-			return true;
+			$key = intval($objDobaProductData->item_id());
+			if ($key > 0 && !$this->productExists($key)) {
+				$this->products[$key] = $objDobaProductData;
+				return true;
+			}
 		}
 		return false;
 	}
