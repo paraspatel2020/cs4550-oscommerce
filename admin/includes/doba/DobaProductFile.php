@@ -4,6 +4,7 @@ include_once('doba/DobaProductData.php');
 include_once('doba/DobaProducts.php');
 
 class DobaProductFile {
+	var $produts = array();
 	/**
 	 * Default constructor
 	 * @return 
@@ -11,7 +12,7 @@ class DobaProductFile {
 	function DobaProductFile () {
 				
 	}
-
+	
 	/**
 	 * Proccess a file and store the files elements in a DobaProduts object
 	 * @static method
@@ -48,15 +49,56 @@ class DobaProductFile {
 			}	
 		}
 		
-		echo "<pre>";
-		print_r($headers);
+		//echo "<pre>";
+		//print_r($headers);
 		
 		while(!feof($fp)) 
 		{ 
 			$data = fgets($fp);
-				
-			$values = explode($delm, $data);
 
+			//$values = explode($delm, $data);	
+			$values = array();		
+			$addCom = false;
+			$cnt =0;
+			
+			for ($x =0; $x < strlen($data); $x++)
+			{
+				$chr = $data[$x];
+
+				if ($addCom)
+				{
+					if ($chr == '"')
+					{
+						$addCom = false;
+						$values[$cnt] = $values[$cnt].$chr;
+					}
+					else if ($chr == $delm)
+					{
+						$values[$cnt] = $values[$cnt].$chr;
+					}
+					else
+					{
+						$values[$cnt] = $values[$cnt].$chr;
+					}
+				}
+				else
+				{
+					if ($chr == '"')
+					{
+						$addCom = true;
+						$values[$cnt] = $values[$cnt].$chr;	
+					}
+					else if ($chr == $delm)
+					{
+						$cnt++;
+					}					
+					else
+					{
+						$values[$cnt] = $values[$cnt].$chr;
+					}					
+				}
+			}
+			
 			/* Fields to fill in on the osCommerce add product page
 			 * Products Status:   In Stock,  Out of Stock		. Passing the current available in the object, needs to be processed before being added to database
 			 * Date Available									/
@@ -78,7 +120,6 @@ class DobaProductFile {
 //$temp = array_keys($headers, 'ITEM_ID');
 //echo 'Keys \'ITEM_ID\': '.$temp[0].'<br>';
 //echo 'Val \'ITEM VAL\': '.$values[$temp[0]].'<br>';
-			print_r($values);
 
 			$tempDPD =  new DobaProductData();
 			
@@ -110,10 +151,10 @@ class DobaProductFile {
 		
 		fclose($fp);
 		
-		var_dump($DobaProds);
-		echo "</pre>";
+		//var_dump($DobaProds);
+		//echo "</pre>";
 	
 		return $DobaProds;
-	}
+	}		
 }
 ?>
