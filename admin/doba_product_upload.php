@@ -13,9 +13,12 @@ ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/
 
 require('includes/application_top.php');
 
+require_once('doba/DobaProductFile.php');
+require_once('doba/DobaProducts.php');
+require_once('doba/DobaLog.php');
+
 $msg = '';
 if (isset($_POST['submit'])) {
-	require_once('doba/DobaProductFile.php');
 	require_once('doba/DobaInteraction.php');
 	
 	$filename = isset($_FILES['product_file']['name']) ? $_FILES['product_file']['name'] : '';
@@ -24,11 +27,14 @@ if (isset($_POST['submit'])) {
 	
 	$objDobaProducts = DobaProductFile::processFile($tmpfile, $file_type);
 	if (is_a($objDobaProducts, 'DobaProducts') && DobaInteraction::loadDobaProductsIntoDB( $objDobaProducts )) {
+		DobaLog::logProductUpload($objDobaProducts, $filename);
 		$msg = $filename.UPLOAD_SUCCESS_MSG;
 	} else {
 		$MSG = UPLOAD_FAILURE_MSG;
 	}
 }
+
+$upload_history = DobaLog::getLogHistorySummary('product');
 ?>
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html <?php echo HTML_PARAMS; ?>>
@@ -36,6 +42,7 @@ if (isset($_POST['submit'])) {
 <meta http-equiv="Content-Type" content="text/html; charset=<?php echo CHARSET; ?>">
 <title><?php echo TITLE; ?></title>
 <link rel="stylesheet" type="text/css" href="includes/stylesheet.css">
+<link rel="stylesheet" type="text/css" href="includes/doba.css">
 <script language="javascript" src="includes/general.js"></script>
 </head>
 <body marginwidth="0" marginheight="0" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" bgcolor="#FFFFFF" onload="SetFocus();">
@@ -88,6 +95,44 @@ if (isset($_POST['submit'])) {
 					</tr>
 				</table>
 			</form>
+			
+			<p><strong><?php echo UPLOAD_HISTORY; ?></strong></p>
+			<table class="data">
+				<thead>
+					<tr>
+						<th><?php echo TABLE_HEAD_DATE; ?></th>
+						<th><?php echo TABLE_HEAD_XFER_METHOD; ?></th>
+						<th><?php echo TABLE_HEAD_FILENAME; ?></th>
+						<th><?php echo TABLE_HEAD_API_RESPONSE; ?></th>
+						<th><?php echo TABLE_HEAD_PRODUCT_CNT; ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php 
+						if (count($upload_history) > 0) { 
+							foreach ($upload_history as $uh) { 
+					?>
+							<tr>
+								<td><?php echo $uh['ymdt']; ?></td>
+								<td><?php echo $uh['xfer_method']; ?></td>
+								<td><?php echo $uh['filename']; ?></td>
+								<td><?php echo $uh['api_response']; ?></td>
+								<td><?php echo $uh['cnt']; ?></td>							
+							</tr>
+					<?php 
+							} 
+						} else {
+					?>
+						<tr>
+							<td colspan="5" style="color: #999;">
+								<?php echo MSG_NO_HISTORY; ?>
+							</td>
+						</tr>
+					<?php		
+						}
+					?>					
+				</tbody>
+			</table>
 		
 		</td>
       </tr>

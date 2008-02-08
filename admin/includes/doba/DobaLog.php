@@ -108,11 +108,31 @@ class DobaLog {
 		return isset($this->fields['api_response']) ? trim($this->fields['api_response']) : null;
 	}
 	
-	function logOrderDownload($objDobaOrders, $filename, $time) {
+	function logOrderDownload($objDobaOrders, $filename, $time=null) {
+		if (is_null($time)) {
+			$time = time();
+		}
 		foreach ($objDobaOrders->orders as $o) {
 			$dl = new DobaLog();
 			$dl->datatype('order');
 			$dl->local_id($o->po_number());
+			$dl->xfer_method('file');
+			$dl->ymdt($time, true);
+			$dl->filename($filename);
+			$dl->store();
+		}
+		
+		return;
+	}
+	
+	function logProductUpload($objDobaProducts, $filename, $time=null) {
+		if (is_null($time)) {
+			$time = time();
+		}
+		foreach ($objDobaProducts->products as $p) {
+			$dl = new DobaLog();
+			$dl->datatype('product');
+			$dl->local_id($p->item_id());
 			$dl->xfer_method('file');
 			$dl->ymdt($time, true);
 			$dl->filename($filename);
@@ -127,7 +147,7 @@ class DobaLog {
 		$ret = array();
 		
 		$sql = 'select 
-					ymdt, xfer_method, filename, api_response, count(*) as order_cnt 
+					ymdt, xfer_method, filename, api_response, count(*) as cnt 
 				from 
 					DobaLog 
 				where 

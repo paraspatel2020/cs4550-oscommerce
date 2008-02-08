@@ -135,10 +135,11 @@ class DobaProductFile {
 			$descr = DobaProductFile::pruneQuotes($values[$temp[0]]);
 			$temp = array_keys($headers, 'DETAILS');
 			$details = DobaProductFile::pruneQuotes($values[$temp[0]]);
-			if (!empty($descr)) {
-				$descr .= '<br><br>';
+			if (!empty($descr) && !empty($details)) {
+				$descr .= '<br><br>' . $details;
+			} else {
+				$descr .= $details;
 			}
-			$descr .= $details;
 			$tempDPD->description($descr);
 			
 			$temp = array_keys($headers, 'QTY_AVAIL');

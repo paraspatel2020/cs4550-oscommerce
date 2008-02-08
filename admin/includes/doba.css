@@ -1,0 +1,6 @@
+table.data { border-collapse: collapse; }
+table.data td,
+table.data th { padding: 4px 10px; border: 1px solid #d1d3d4; font-size: 11px; }
+table.data th { background: #d1d3d4; }
+table.data tr.disabled td { color: #999; }
+table.data tr.noborder td { border: none; padding-top: 15px; }
