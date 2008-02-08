@@ -59,16 +59,8 @@ $download_history = DobaLog::getLogHistorySummary('order');
 <meta http-equiv="Content-Type" content="text/html; charset=<?php echo CHARSET; ?>">
 <title><?php echo TITLE; ?></title>
 <link rel="stylesheet" type="text/css" href="includes/stylesheet.css">
+<link rel="stylesheet" type="text/css" href="includes/doba.css">
 <script language="javascript" src="includes/general.js"></script>
-
-<style type="text/css">
-	table.data { border-collapse: collapse; }
-	table.data td,
-	table.data th { padding: 4px 10px; border: 1px solid #d1d3d4; }
-	table.data th { background: #d1d3d4; }
-	table.data tr.disabled td { color: #999; }
-	table.data tr.noborder td { border: none; padding-top: 15px; }
-</style>
 </head>
 <body marginwidth="0" marginheight="0" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" bgcolor="#FFFFFF" onload="SetFocus();">
 <div id="spiffycalendar" class="text"></div>
@@ -174,7 +166,7 @@ $download_history = DobaLog::getLogHistorySummary('order');
 								<td><?php echo $dh['xfer_method']; ?></td>
 								<td><?php echo $dh['filename']; ?></td>
 								<td><?php echo $dh['api_response']; ?></td>
-								<td><?php echo $dh['order_cnt']; ?></td>							
+								<td><?php echo $dh['cnt']; ?></td>							
 							</tr>
 					<?php 
 							} 

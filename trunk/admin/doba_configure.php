@@ -11,7 +11,11 @@ ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/
   Released under the GNU General Public License
 */
 
-  require('includes/application_top.php');
+require('includes/application_top.php');
+require_once('doba/DobaLog.php');
+
+$download_history = DobaLog::getLogHistorySummary('order');
+$upload_history = DobaLog::getLogHistorySummary('product');
 ?>
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html <?php echo HTML_PARAMS; ?>>
@@ -19,6 +23,7 @@ ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/
 <meta http-equiv="Content-Type" content="text/html; charset=<?php echo CHARSET; ?>">
 <title><?php echo TITLE; ?></title>
 <link rel="stylesheet" type="text/css" href="includes/stylesheet.css">
+<link rel="stylesheet" type="text/css" href="includes/doba.css">
 <script language="javascript" src="includes/general.js"></script>
 </head>
 <body marginwidth="0" marginheight="0" topmargin="0" bottommargin="0" leftmargin="0" rightmargin="0" bgcolor="#FFFFFF" onload="SetFocus();">
@@ -48,87 +53,81 @@ ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/
       <tr>
         <td>
         	
-			<!-- <table border="0" width="100%" cellspacing="0" cellpadding="0">
-          <tr>
-            <td valign="top"><table border="0" width="100%" cellspacing="0" cellpadding="2">
-              <tr class="dataTableHeadingRow">
-                <td class="dataTableHeadingContent"><?php echo TABLE_HEADING_ADMINISTRATORS; ?></td>
-                <td class="dataTableHeadingContent" align="right"><?php echo TABLE_HEADING_ACTION; ?>&nbsp;</td>
-              </tr>
-<?php
-  $admins_query = tep_db_query("select id, user_name from " . TABLE_ADMINISTRATORS . " order by user_name");
-  while ($admins = tep_db_fetch_array($admins_query)) {
-    if ((!isset($HTTP_GET_VARS['aID']) || (isset($HTTP_GET_VARS['aID']) && ($HTTP_GET_VARS['aID'] == $admins['id']))) && !isset($aInfo) && (substr($action, 0, 3) != 'new')) {
-      $aInfo = new objectInfo($admins);
-    }
-
-    if ( (isset($aInfo) && is_object($aInfo)) && ($admins['id'] == $aInfo->id) ) {
-      echo '                  <tr id="defaultSelected" class="dataTableRowSelected" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="document.location.href=\'' . tep_href_link(FILENAME_ADMINISTRATORS, 'aID=' . $aInfo->id . '&action=edit') . '\'">' . "\n";
-    } else {
-      echo '                  <tr class="dataTableRow" onmouseover="rowOverEffect(this)" onmouseout="rowOutEffect(this)" onclick="document.location.href=\'' . tep_href_link(FILENAME_ADMINISTRATORS, 'aID=' . $admins['id']) . '\'">' . "\n";
-    }
-?>
-                <td class="dataTableContent"><?php echo $admins['user_name']; ?></td>
-                <td class="dataTableContent" align="right"><?php if ( (isset($aInfo) && is_object($aInfo)) && ($admins['id'] == $aInfo->id) ) { echo tep_image(DIR_WS_IMAGES . 'icon_arrow_right.gif', ''); } else { echo '<a href="' . tep_href_link(FILENAME_ADMINISTRATORS, 'aID=' . $admins['id']) . '">' . tep_image(DIR_WS_IMAGES . 'icon_info.gif', IMAGE_ICON_INFO) . '</a>'; } ?>&nbsp;</td>
-              </tr>
-<?php
-  }
-?>
-              <tr>
-                <td colspan="2" align="right"><?php echo '<a href="' . tep_href_link(FILENAME_ADMINISTRATORS, 'action=new') . '">' . tep_image_button('button_insert.gif', IMAGE_INSERT) . '</a>'; ?></td>
-              </tr>
-            </table></td>
-<?php
-  $heading = array();
-  $contents = array();
-
-  switch ($action) {
-    case 'new':
-      $heading[] = array('text' => '<b>' . TEXT_INFO_HEADING_NEW_ADMINISTRATOR . '</b>');
-
-      $contents = array('form' => tep_draw_form('administrator', FILENAME_ADMINISTRATORS, 'action=insert'));
-      $contents[] = array('text' => TEXT_INFO_INSERT_INTRO);
-      $contents[] = array('text' => '<br>' . TEXT_INFO_USERNAME . '<br>' . tep_draw_input_field('username'));
-      $contents[] = array('text' => '<br>' . TEXT_INFO_PASSWORD . '<br>' . tep_draw_password_field('password'));
-      $contents[] = array('align' => 'center', 'text' => '<br>' . tep_image_submit('button_save.gif', IMAGE_SAVE) . '&nbsp;<a href="' . tep_href_link(FILENAME_ADMINISTRATORS) . '">' . tep_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
-      break;
-    case 'edit':
-      $heading[] = array('text' => '<b>' . $aInfo->user_name . '</b>');
-
-      $contents = array('form' => tep_draw_form('administrator', FILENAME_ADMINISTRATORS, 'aID=' . $aInfo->id . '&action=save'));
-      $contents[] = array('text' => TEXT_INFO_EDIT_INTRO);
-      $contents[] = array('text' => '<br>' . TEXT_INFO_USERNAME . '<br>' . tep_draw_input_field('username', $aInfo->user_name));
-      $contents[] = array('text' => '<br>' . TEXT_INFO_NEW_PASSWORD . '<br>' . tep_draw_password_field('password'));
-      $contents[] = array('align' => 'center', 'text' => '<br>' . tep_image_submit('button_update.gif', IMAGE_UPDATE) . '&nbsp;<a href="' . tep_href_link(FILENAME_ADMINISTRATORS, 'aID=' . $aInfo->id) . '">' . tep_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
-      break;
-    case 'delete':
-      $heading[] = array('text' => '<b>' . $aInfo->user_name . '</b>');
-
-      $contents = array('form' => tep_draw_form('administrator', FILENAME_ADMINISTRATORS, 'aID=' . $aInfo->id . '&action=deleteconfirm'));
-      $contents[] = array('text' => TEXT_INFO_DELETE_INTRO);
-      $contents[] = array('text' => '<br><b>' . $aInfo->user_name . '</b>');
-      $contents[] = array('align' => 'center', 'text' => '<br>' . tep_image_submit('button_delete.gif', IMAGE_UPDATE) . '&nbsp;<a href="' . tep_href_link(FILENAME_ADMINISTRATORS, 'aID=' . $aInfo->id) . '">' . tep_image_button('button_cancel.gif', IMAGE_CANCEL) . '</a>');
-      break;
-    default:
-      if (isset($aInfo) && is_object($aInfo)) {
-        $heading[] = array('text' => '<b>' . $aInfo->user_name . '</b>');
-
-        $contents[] = array('align' => 'center', 'text' => '<a href="' . tep_href_link(FILENAME_ADMINISTRATORS, 'aID=' . $aInfo->id . '&action=edit') . '">' . tep_image_button('button_edit.gif', IMAGE_EDIT) . '</a> <a href="' . tep_href_link(FILENAME_ADMINISTRATORS, 'aID=' . $aInfo->id . '&action=delete') . '">' . tep_image_button('button_delete.gif', IMAGE_DELETE) . '</a>');
-      }
-      break;
-  }
-
-  if ( (tep_not_null($heading)) && (tep_not_null($contents)) ) {
-    echo '            <td width="25%" valign="top">' . "\n";
-
-    $box = new box;
-    echo $box->infoBox($heading, $contents);
-
-    echo '            </td>' . "\n";
-  }
-?>
-          </tr>
-        </table> -->
+			<p><strong><?php echo UPLOAD_HISTORY; ?></strong></p>
+			<table class="data">
+				<thead>
+					<tr>
+						<th><?php echo TABLE_HEAD_DATE; ?></th>
+						<th><?php echo TABLE_HEAD_XFER_METHOD; ?></th>
+						<th><?php echo TABLE_HEAD_FILENAME; ?></th>
+						<th><?php echo TABLE_HEAD_API_RESPONSE; ?></th>
+						<th><?php echo TABLE_HEAD_PRODUCT_CNT; ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php 
+						if (count($upload_history) > 0) { 
+							foreach ($upload_history as $uh) { 
+					?>
+							<tr>
+								<td><?php echo $uh['ymdt']; ?></td>
+								<td><?php echo $uh['xfer_method']; ?></td>
+								<td><?php echo $uh['filename']; ?></td>
+								<td><?php echo $uh['api_response']; ?></td>
+								<td><?php echo $uh['cnt']; ?></td>							
+							</tr>
+					<?php 
+							} 
+						} else {
+					?>
+						<tr>
+							<td colspan="5" style="color: #999;">
+								<?php echo MSG_NO_PRODUCT_HISTORY; ?>
+							</td>
+						</tr>
+					<?php		
+						}
+					?>					
+				</tbody>
+			</table>
+			
+			<p><strong><?php echo DOWNLOAD_HISTORY; ?></strong></p>
+			<table class="data">
+				<thead>
+					<tr>
+						<th><?php echo TABLE_HEAD_DATE; ?></th>
+						<th><?php echo TABLE_HEAD_XFER_METHOD; ?></th>
+						<th><?php echo TABLE_HEAD_FILENAME; ?></th>
+						<th><?php echo TABLE_HEAD_API_RESPONSE; ?></th>
+						<th><?php echo TABLE_HEAD_ORDER_CNT; ?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php 
+						if (count($download_history) > 0) { 
+							foreach ($download_history as $dh) { 
+					?>
+							<tr>
+								<td><?php echo $dh['ymdt']; ?></td>
+								<td><?php echo $dh['xfer_method']; ?></td>
+								<td><?php echo $dh['filename']; ?></td>
+								<td><?php echo $dh['api_response']; ?></td>
+								<td><?php echo $dh['cnt']; ?></td>							
+							</tr>
+					<?php 
+							} 
+						} else {
+					?>
+						<tr>
+							<td colspan="5" style="color: #999;">
+								<?php echo MSG_NO_ORDER_HISTORY; ?>
+							</td>
+						</tr>
+					<?php		
+						}
+					?>					
+				</tbody>
+			</table>
 		
 		</td>
       </tr>

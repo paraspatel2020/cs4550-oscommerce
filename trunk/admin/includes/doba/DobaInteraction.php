@@ -50,15 +50,23 @@ class DobaInteraction {
 	 */
 	function loadDobaProductsIntoDB( $products ) {
 		if (is_a($products, 'DobaProducts')) {
-			$sql = 'replace into ' . TABLE_PRODUCTS . ' 
-						(products_id, products_quantity, products_model, products_image, products_price, products_last_modified, products_weight, 
-						products_status, products_tax_class_id, manufacturers_id) 
-					values ';
+			$sql_prod = 'replace into ' . TABLE_PRODUCTS . ' 
+							(products_id, products_quantity, products_model, products_image, products_price, products_last_modified, products_weight, 
+							products_status, products_tax_class_id, manufacturers_id) 
+						values ';
+			$sql_cat = 'replace into ' . TABLE_PRODUCTS_TO_CATEGORIES . ' 
+							(products_id, categories_id) 
+						values';
+			$sql_descr = 'replace into ' . TABLE_PRODUCTS_DESCRIPTION . ' 
+							(products_id, language_id, products_name, products_description) 
+						values ';
 
 			$can_insert = false;
 			foreach ($products->products as $prod) {
 				if ($can_insert) {
-					$sql .= ', ';
+					$sql_prod .= ', ';
+					$sql_cat .= ', ';
+					$sql_descr .= ', ';
 				}
 				$can_insert = true;
 				$products_id = $prod->item_id();
@@ -75,18 +83,27 @@ class DobaInteraction {
 				$products_status = ($prod->quantity() > 0) ? 1 : 0;
 				$products_tax_class_id = 1;
 				$manufacturers_id = 'NULL';
+				$categories_id = 0;
+				$language_id = 1;
+				$products_name = $prod->title();
+				$products_description = $prod->description();
 				
-				$sql .= '(' . $products_id . ', ' . $products_quantity . ', "' . $products_model . '", "' . $products_image . '", ' . $products_price . ', 
-						' . $products_last_modified . ', ' . $products_weight . ', ' . $products_status . ', ' . $products_tax_class_id . ', 
-						' . $manufacturers_id . ')';
+				$sql_prod .= '(' . $products_id . ', ' . $products_quantity . ', "' . tep_db_prepare_input($products_model) . '", 
+							"' . tep_db_prepare_input($products_image) . '", ' . $products_price . ', ' . $products_last_modified . ', 
+							' . $products_weight . ', ' . $products_status . ', ' . $products_tax_class_id . ', ' . $manufacturers_id . ')';
+				$sql_cat .= '(' . $products_id . ', ' . $categories_id . ')';
+				$sql_descr .= '(' . $products_id . ', ' . $language_id . ', "' . tep_db_prepare_input($products_name) . '", 
+							"' . tep_db_prepare_input($products_description) . '")';
 			}
 			
 			if ($can_insert) {
-				tep_db_query($sql);
+				tep_db_query($sql_prod);
+				tep_db_query($sql_cat);
+				tep_db_query($sql_descr);
 				
 				$sql = 'update ' . TABLE_PRODUCTS . ' set products_date_added=now(), products_date_available=now() where products_date_added is NULL';
 				tep_db_query($sql);
-				
+					
 				return true;
 			}
 		}
