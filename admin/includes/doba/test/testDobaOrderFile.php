@@ -23,20 +23,29 @@ $tempData = array(
 	'max' => '1025',
 );
 
-$dboi->po_number($tempData['orders_id']);
-$dboi->first_name($tempData['first_name']);
-$dboi->last_name($tempData['last_name']);
-$dboi->address1($tempData['address']);
-$dboi->address2($tempData['address2']);
-$dboi->city($tempData['city']);
-$dboi->state($tempData['state']);
-$dboi->postal($tempData['postal']);
-$dboi->country($tempData['country']);
-$dboi->item_id($tempData['items_id']);
-$dboi->quantity($tempData['quantity']);
-$dboi->max_expected_total($tempData['max']);
+for ($i = 0; $i < 10; $i++)
+{
+	$temp = new DobaOrderInfo(); 
+	$temp->po_number($i);
+	$temp->first_name($tempData['first_name']);
+	$temp->last_name($tempData['last_name']);
+	$temp->address1($tempData['address']);
+	$temp->address2($tempData['address2']);
+	$temp->city($tempData['city']);
+	$temp->state($tempData['state']);
+	$temp->postal($tempData['postal']);
+	$temp->country($tempData['country']);
+	$temp->item_id($tempData['items_id']);
+	$dboi->quantity($tempData['quantity']);
+	$dboi->max_expected_total($tempData['max']);
+	
+	$do->addOrder($temp);
+}
 
-$do->addOrder($dboi);
+/*for ($i = 0; $i < 10; $i++)
+{
+	$do->addOrder($dboi);
+}*/
 
 echo "<pre>";
 $dof->processData($do);
