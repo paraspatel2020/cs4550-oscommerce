@@ -4,6 +4,11 @@ class DobaLog {
 	
 	function DobaLog() {}
 	
+	/**
+	 * This function copies the log into the array $fields
+	 * @return bool. True if there is data in the log to copy. Otherwise returns false
+	 * @param $doba_log_id int
+	 */
 	function load($doba_log_id) {
 		$doba_log_id = intval($doba_log_id);
 		
@@ -20,6 +25,10 @@ class DobaLog {
 		return false;
 	}
 	
+	/**
+	 * 
+	 * @return 
+	 */
 	function store() {
 		$new_entry = true;
 		if (isset($this->fields['doba_log_id']) && $this->fields['doba_log_id'] > 0) {
