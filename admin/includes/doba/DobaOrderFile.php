@@ -18,12 +18,6 @@ class DobaOrderFile
 	 */
 	function processData ($orders)
 	{
-		/*
-		 * Looking at the example order file, it looks like we did not declare all the
-		 * required data fields as variables in DobaOrderInfo.  We are missing address2,
-		 * quantity, and maxexpectedtotal.  Also, is the PONumber the order_id? What is the
-		 * item_id? I can change or add these after clarification.
-		 */
 		$this->echoHeader();
 		foreach ($orders->orders as $o) {
 			$this->echoData($o->po_number());
