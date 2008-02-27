@@ -153,7 +153,78 @@ class DobaProductFile {
 			
 			$temp = array_keys($headers, 'SKU');
 			$tempDPD->product_sku(DobaProductFile::pruneQuotes($values[$temp[0]]));
+			
+			$temp = array_keys($headers, 'PRICE');
+			$wholesale = $values[$temp[0]];
+			
+			$temp = array_keys($headers, 'MAP');
+			$map = $values[$temp[0]];
+			
+			$temp = array_keys($headers, 'MSRP');
+			$msrp = $values[$temp[0]];
+			
+			
+			// Check for optional headers that would affect the price loaded 
+			// into the DobaProductData object		
+			if (in_array('OSC_WHOLESALE_MARKUP_PERCENT', $headers)) {
+				$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_PERCENT');
+				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+					$percent = $values[$temp[0]];
+					if ($percent > 1) {
+						$percent = $percent / 100;
+					}
+					$new_cost = $wholesale * (1 + $percent);
 					
+					if ($map > 0 && $new_cost < $map) {
+						$new_cost = $map;
+					}
+					
+					$tempDPD->price($new_cost);
+				}				
+			}
+			elseif (in_array('OSC_WHOLESALE_MARKUP_DOLLAR', $headers)) {
+				$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_DOLLAR');
+				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+					$markup = $values[$temp[0]];
+					$new_cost = $wholesale + $markup;
+					
+					if ($map > 0 && $new_cost < $map) {
+						$new_cost = $map;
+					}
+					
+					$tempDPD->price($new_cost);
+				}
+			}
+			elseif (in_array('OSC_MSRP_MARKUP_PERCENT', $headers)) {
+				$temp = array_keys($headers, 'OSC_MSRP_MARKUP_PERCENT');
+				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+					$percent = $values[$temp[0]];
+					if ($percent > 1) {
+						$percent = $percent / 100;
+					}
+					$new_cost = $msrp * (1 + $percent);
+					
+					if ($map > 0 && $new_cost < $map) {
+						$new_cost = $map;
+					}
+					
+					$tempDPD->price($new_cost);
+				}
+			}
+			elseif (in_array('OSC_MSRP_MARKUP_DOLLAR', $headers)) {
+				$temp = array_keys($headers, 'OSC_MSRP_MARKUP_DOLLAR');
+				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+					$markup = $values[$temp[0]];
+					$new_cost = $msrp + $markup;
+					
+					if ($map > 0 && $new_cost < $map) {
+						$new_cost = $map;
+					}
+					
+					$tempDPD->price($new_cost);
+				}
+			}
+			
 			$DobaProds->addProduct($tempDPD);
 		} 
 		
