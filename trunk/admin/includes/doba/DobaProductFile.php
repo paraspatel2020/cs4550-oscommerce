@@ -80,11 +80,13 @@ class DobaProductFile {
 	function setQuantity($tempHeaders, $tempValues, $temp_supplied_qty) {
 		// Check for optional headers that would affect the item quantity available loaded 
 		// into the DobaProductData object
+		$headers = $tempHeaders;
+		$values = $tempValues;
 		$new_quantity = $temp_supplied_qty;
-		if (in_array('OSC_QUANTITY_AUTOADJUST', $tempHeaders)) {
-			$temp = array_keys($tempHeaders,'OSC_QUANTITY_AUTOADJUST');
-			if (isset($tempValues[$temp[0]]) && !empty($tempValues[$temp[0]])) {
-				$level = $tempValues[$temp[0]];
+		if (in_array('OSC_QUANTITY_AUTOADJUST', $headers)) {
+			$temp = array_keys($headers,'OSC_QUANTITY_AUTOADJUST');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$level = $values[$temp[0]];
 				$normal = 'normal';
 				$none = 'none';
 				$liberal = 'liberal';
@@ -104,10 +106,10 @@ class DobaProductFile {
 				}
 			}
 		}
-		elseif (in_array('OSC_QUANTITY_EXACT', $tempHeaders)) {
-			$temp = array_keys($tempHeaders,'OSC_QUANTITY_EXACT');
-			if (isset($tempValues[$temp[0]]) && !empty($tempValues[$temp[0]])) {
-				$new_quantity = $tempValues[$temp[0]];
+		elseif (in_array('OSC_QUANTITY_EXACT', $headers)) {
+			$temp = array_keys($headers,'OSC_QUANTITY_EXACT');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$new_quantity = $values[$temp[0]];
 			}
 		}
 		return round($new_quantity);
