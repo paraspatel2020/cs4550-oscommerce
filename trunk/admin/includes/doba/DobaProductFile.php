@@ -70,6 +70,123 @@ class DobaProductFile {
 	// "123"
 	
 	/**
+	 * Takes the headers and values array and adjusts the quantity to be provided to the
+	 * 		DobaProductData object
+	 * @return integer representing the new quantity or the existing one if no changes are made.
+	 * @param $tempHeaders Object
+	 * @param $tempValues Object
+	 * @param $temp_supplied_qty Object
+	 */
+	function setQuantity($tempHeaders, $tempValues, $temp_supplied_qty) {
+		// Check for optional headers that would affect the item quantity available loaded 
+		// into the DobaProductData object
+		$new_quantity = $temp_supplied_qty;
+		if (in_array('OSC_QUANTITY_AUTOADJUST', $tempHeaders)) {
+			$temp = array_keys($tempHeaders,'OSC_QUANTITY_AUTOADJUST');
+			if (isset($tempValues[$temp[0]]) && !empty($tempValues[$temp[0]])) {
+				$level = $tempValues[$temp[0]];
+				$normal = 'normal';
+				$none = 'none';
+				$liberal = 'liberal';
+				$conservative = 'conservative';
+				
+				if (strtolower(trim($level) === $normal)) {
+					$new_quantity = $temp_supplied_qty * .5; 
+				}
+				elseif (strtolower(trim($level) === $liberal)) {
+					$new_quantity = $temp_supplied_qty * .75; 
+				}
+				elseif (strtolower(trim($level) === $conservative)) {
+					$new_quantity = $temp_supplied_qty * .25; 
+				}
+				else {
+					$new_quantity = $temp_supplied_qty; 
+				}
+			}
+		}
+		elseif (in_array('OSC_QUANTITY_EXACT', $tempHeaders)) {
+			$temp = array_keys($tempHeaders,'OSC_QUANTITY_EXACT');
+			if (isset($tempValues[$temp[0]]) && !empty($tempValues[$temp[0]])) {
+				$new_quantity = $tempValues[$temp[0]];
+			}
+		}
+		return round($new_quantity);
+	}
+	
+	/**
+	 * Adjusts the price as necessary and returns the new wholesale cost to be supplied to the 
+	 * DobaProductData object
+	 * @return the wholesale cost
+	 * @param $tempHeaders Object
+	 * @param $tempValues Object
+	 * @param $tempWholesale Object
+	 * @param $tempMap Object
+	 * @param $tempMSRP Object
+	 */
+	function setPrice($tempHeaders, $tempValues, $tempWholesale, $tempMap, $tempMSRP) {
+		// Check for optional headers that would affect the price loaded 
+		// into the DobaProductData object
+		$wholesale = $tempWholesale;
+		$map = $tempMap;
+		$msrp = $tempMSRP;
+		$new_cost = $tempWholesale;	
+		$headers = $tempHeaders;
+		$values = $tempValues;	
+		if (in_array('OSC_WHOLESALE_MARKUP_PERCENT', $headers)) {
+			$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_PERCENT');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$percent = $values[$temp[0]];
+				if ($percent > 1) {
+					$percent = $percent / 100;
+				}
+				$new_cost = $wholesale * (1 + $percent);
+				
+				if ($map > 0 && $new_cost < $map) {
+					$new_cost = $map;
+				}
+			}				
+		}
+		elseif (in_array('OSC_WHOLESALE_MARKUP_DOLLAR', $headers)) {
+			$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_DOLLAR');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$markup = $values[$temp[0]];
+				$new_cost = $wholesale + $markup;
+				
+				if ($map > 0 && $new_cost < $map) {
+					$new_cost = $map;
+				}
+			}
+		}
+		elseif (in_array('OSC_MSRP_MARKUP_PERCENT', $headers)) {
+			$temp = array_keys($headers, 'OSC_MSRP_MARKUP_PERCENT');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$percent = $values[$temp[0]];
+				if ($percent > 1) {
+					$percent = $percent / 100;
+				}
+				$new_cost = $msrp * (1 + $percent);
+				
+				if ($map > 0 && $new_cost < $map) {
+					$new_cost = $map;
+				}
+			}
+		}
+		elseif (in_array('OSC_MSRP_MARKUP_DOLLAR', $headers)) {
+			$temp = array_keys($headers, 'OSC_MSRP_MARKUP_DOLLAR');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$markup = $values[$temp[0]];
+				$new_cost = $msrp + $markup;
+				
+				if ($map > 0 && $new_cost < $map) {
+					$new_cost = $map;
+				}
+			}
+		}
+		
+		return new_cost;
+	}
+	
+	/**
 	 * Proccess a file and store the files elements in a DobaProduts object
 	 * @static method
 	 * @return 
@@ -143,7 +260,8 @@ class DobaProductFile {
 			$tempDPD->description($descr);
 			
 			$temp = array_keys($headers, 'QTY_AVAIL');
-			$tempDPD->quantity($values[$temp[0]]);
+		    $supplied_qty = $values[$temp[0]];
+			$tempDPD->$quantity(DobaProductFile::setQuantity($headers, $values, $supplied_qty));
 			
 			$temp = array_keys($headers, 'IMAGE_URL');
 			$tempDPD->image_url(DobaProductFile::pruneQuotes($values[$temp[0]]));
@@ -162,68 +280,7 @@ class DobaProductFile {
 			
 			$temp = array_keys($headers, 'MSRP');
 			$msrp = $values[$temp[0]];
-			
-			
-			// Check for optional headers that would affect the price loaded 
-			// into the DobaProductData object		
-			if (in_array('OSC_WHOLESALE_MARKUP_PERCENT', $headers)) {
-				$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_PERCENT');
-				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$percent = $values[$temp[0]];
-					if ($percent > 1) {
-						$percent = $percent / 100;
-					}
-					$new_cost = $wholesale * (1 + $percent);
-					
-					if ($map > 0 && $new_cost < $map) {
-						$new_cost = $map;
-					}
-					
-					$tempDPD->price($new_cost);
-				}				
-			}
-			elseif (in_array('OSC_WHOLESALE_MARKUP_DOLLAR', $headers)) {
-				$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_DOLLAR');
-				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$markup = $values[$temp[0]];
-					$new_cost = $wholesale + $markup;
-					
-					if ($map > 0 && $new_cost < $map) {
-						$new_cost = $map;
-					}
-					
-					$tempDPD->price($new_cost);
-				}
-			}
-			elseif (in_array('OSC_MSRP_MARKUP_PERCENT', $headers)) {
-				$temp = array_keys($headers, 'OSC_MSRP_MARKUP_PERCENT');
-				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$percent = $values[$temp[0]];
-					if ($percent > 1) {
-						$percent = $percent / 100;
-					}
-					$new_cost = $msrp * (1 + $percent);
-					
-					if ($map > 0 && $new_cost < $map) {
-						$new_cost = $map;
-					}
-					
-					$tempDPD->price($new_cost);
-				}
-			}
-			elseif (in_array('OSC_MSRP_MARKUP_DOLLAR', $headers)) {
-				$temp = array_keys($headers, 'OSC_MSRP_MARKUP_DOLLAR');
-				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$markup = $values[$temp[0]];
-					$new_cost = $msrp + $markup;
-					
-					if ($map > 0 && $new_cost < $map) {
-						$new_cost = $map;
-					}
-					
-					$tempDPD->price($new_cost);
-				}
-			}
+			$tempDPD->$price(DobaProductFile::setPrice($headers, $values, $wholesale, $map, $msrp));
 			
 			$DobaProds->addProduct($tempDPD);
 		} 
