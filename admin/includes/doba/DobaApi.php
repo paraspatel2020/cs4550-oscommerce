@@ -22,6 +22,7 @@ class DobaApi {
 	var $api_url;
 	var $username;
 	var $password;
+	var $retailer_id;
 	var $enabled;
 	
 	var $requestXml = '';
@@ -33,6 +34,7 @@ class DobaApi {
 		$this->api_url = (DOBA_TEST_MODE_ENABLED === true) ? DOBA_URL_SANDBOX : DOBA_URL_LIVE;
 		$this->username = DOBA_USERNAME;
 		$this->password = DOBA_PASSWORD;
+		$this->retailer_id = DOBA_RETAILER_ID;
 		$this->enabled = DOBA_API_ENABLED;
 	}
 	
@@ -42,6 +44,10 @@ class DobaApi {
 	
 	function addErrorMsg($msg) {
 		$this->errors[] = trim($msg);
+	}
+	
+	function hasErrors() {
+		return (count($this->errors) > 0);
 	}
 	
 	function getErrorMsgs() {
@@ -131,6 +137,7 @@ class DobaApi {
 						<username>" . $this->username . "</username>
 						<password>" . $this->password . "</password>
 					</authentication>
+					<retailer_id>" . $this->retailer_id . "</retailer_id>
 					<action>" . $action . "</action>
 					" . $data_xml . "
 				</request>
@@ -311,7 +318,25 @@ class DobaApi {
 		}
 		
 		// compile the createOrder XML code
-		$xml = '';
+		$xml = '
+			<shipping_firstname>' . $data['firstname'] . '</shipping_firstname>
+			<shipping_lastname>' . $data['lastname'] . '</shipping_lastname>
+			<shipping_street>' . $data['address1'] . '</shipping_street>
+			<shipping_city>' . $data['city'] . '</shipping_city>
+			<shipping_state>' . $data['state'] . '</shipping_state>
+			<shipping_postal>' . $data['postal'] . '</shipping_postal>
+			<shipping_country>US</shipping_country>
+			<items>
+			';
+		foreach ($data['items'] as $item) {
+			$xml .= '		
+				<item>
+        			<item_id>' . $item['id'] . '</item_id>
+					<quantity>' . $item['qty'] . '</quantity>
+				</item>
+			';	
+		}
+		$xml .= '</items>';
 		
 		return $xml;
 	}
