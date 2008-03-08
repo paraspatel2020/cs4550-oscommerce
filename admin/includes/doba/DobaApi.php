@@ -50,11 +50,11 @@ class DobaApi {
 		return (count($this->errors) > 0);
 	}
 	
-	function getErrorMsgs() {
+	function getErrors() {
 		return $this->errors;
 	}
 	
-	function clearErrorMsgs() {
+	function clearErrors() {
 		$this->errors = array();
 	}
 	
@@ -91,6 +91,7 @@ class DobaApi {
 
         if (curl_errno($ch)) {
         	$this->addErrorMsg('API Error: ' . curl_error($ch));
+			curl_close($ch);
 			return false;
         }
 
@@ -115,7 +116,7 @@ class DobaApi {
 		} else if ($action == '') {
 			$this->addErrorMsg('An "action" is required to compile the xml.');
 			return false;
-		} else if (!is_defined('DOBA_API_ACTION_' . strtoupper($action))) {
+		} else if (!defined('DOBA_API_ACTION_' . strtoupper($action))) {
 			$this->addErrorMsg('"' . $action . '" does not exist or is not available for use.');
 			return false;
 		} else if (count($data) == 0) {
@@ -130,18 +131,18 @@ class DobaApi {
 			return false;
 		}
 		
-		$this->requestXml = "
+		$this->requestXml = '
 			<dce>
 				<request>
 					<authentication>
-						<username>" . $this->username . "</username>
-						<password>" . $this->password . "</password>
+						<username>' . $this->username . '</username>
+						<password>' . $this->password . '</password>
 					</authentication>
-					<retailer_id>" . $this->retailer_id . "</retailer_id>
-					<action>" . $action . "</action>
-					" . $data_xml . "
+					<retailer_id>' . $this->retailer_id . '</retailer_id>
+					<action>' . $action . '</action>
+					' . $data_xml . '
 				</request>
-			</dce>";
+			</dce>';
 			
 		return true;
 	}
@@ -155,7 +156,7 @@ class DobaApi {
 		} else if ($action == '') {
 			$this->addErrorMsg('An "action" is required to compile the xml.');
 			return '';
-		} else if (!is_defined('DOBA_API_ACTION_' . strtoupper($action))) {
+		} else if (!defined('DOBA_API_ACTION_' . strtoupper($action))) {
 			$this->addErrorMsg('"' . $action . '" does not exist or is not available for use.');
 			return '';
 		} else if (count($data) == 0) {
@@ -326,17 +327,20 @@ class DobaApi {
 			<shipping_state>' . $data['state'] . '</shipping_state>
 			<shipping_postal>' . $data['postal'] . '</shipping_postal>
 			<shipping_country>US</shipping_country>
-			<items>
 			';
-		foreach ($data['items'] as $item) {
-			$xml .= '		
-				<item>
-        			<item_id>' . $item['id'] . '</item_id>
-					<quantity>' . $item['qty'] . '</quantity>
-				</item>
-			';	
-		}
-		$xml .= '</items>';
+
+		if (isset($data['items']) && is_array($data['items']) && count($data['items']) > 0) {
+			$xml .= '<items>';
+			foreach ($data['items'] as $item) {
+				$xml .= '		
+					<item>
+	        			<item_id>' . $item['id'] . '</item_id>
+						<quantity>' . $item['qty'] . '</quantity>
+					</item>
+				';	
+			}
+			$xml .= '</items>';
+		}	
 		
 		return $xml;
 	}
