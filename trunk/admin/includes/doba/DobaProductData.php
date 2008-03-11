@@ -242,6 +242,19 @@ class DobaProductData {
 		}
 		
 		return $this->ship_cost;
+	}
+	
+	/**
+	 * Getter setter for $product_url
+	 * @return int
+	 * @param $arg int[optional]
+	 */
+	function product_url($arg=null) {
+		if (!is_null($arg)) {
+			$this->product_url = (int)$arg;
+		}
+		
+		return $this->product_url;
 	}	
 
 	/**
