@@ -88,6 +88,7 @@ class DobaInteraction {
 				$products_name = $prod->title();
 				$products_description = $prod->description();
 				
+				
 				$sql_prod .= '(' . $products_id . ', ' . $products_quantity . ', "' . tep_db_prepare_input($products_model) . '", 
 							"' . tep_db_prepare_input($products_image) . '", ' . $products_price . ', ' . $products_last_modified . ', 
 							' . $products_weight . ', ' . $products_status . ', ' . $products_tax_class_id . ', ' . $manufacturers_id . ')';

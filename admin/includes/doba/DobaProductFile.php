@@ -2,6 +2,10 @@
 //ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/admin/includes/');
 include_once('doba/DobaProductData.php');
 include_once('doba/DobaProducts.php');
+define('QTY_FMT_NORMAL', 'normal');
+define('QTY_FMT_NONE', 'none');
+define('QTY_FMT_LIBERAL', 'liberal');
+define('QTY_FMT_CONSERVATIVE', 'conservative');
 
 class DobaProductFile {
 	var $produts = array();
@@ -73,13 +77,11 @@ class DobaProductFile {
 	 * Takes the headers and values array and adjusts the quantity to be provided to the
 	 * 		DobaProductData object
 	 * @return integer representing the new quantity or the existing one if no changes are made.
-	 * @param $tempHeaders Object
-	 * @param $tempValues Object
-	 * @param $temp_supplied_qty Object
+	 * @param $tempHeaders array
+	 * @param $tempValues array
+	 * @param $temp_supplied_qty int
 	 */
 	function setQuantity($tempHeaders, $tempValues, $temp_supplied_qty) {
-		// Check for optional headers that would affect the item quantity available loaded 
-		// into the DobaProductData object
 		$headers = $tempHeaders;
 		$values = $tempValues;
 		$new_quantity = $temp_supplied_qty;
@@ -87,21 +89,17 @@ class DobaProductFile {
 			$temp = array_keys($headers,'OSC_QUANTITY_AUTOADJUST');
 			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
 				$level = $values[$temp[0]];
-				$normal = 'normal';
-				$none = 'none';
-				$liberal = 'liberal';
-				$conservative = 'conservative';
 				
-				if (strtolower(trim($level) === $normal)) {
+				if (strtolower(trim($level) === QTY_FMT_NORMAL)) {
 					$new_quantity = $temp_supplied_qty * .5; 
 				}
-				elseif (strtolower(trim($level) === $liberal)) {
+				elseif (strtolower(trim($level) === QTY_FMT_LIBERAL)) {
 					$new_quantity = $temp_supplied_qty * .75; 
 				}
-				elseif (strtolower(trim($level) === $conservative)) {
+				elseif (strtolower(trim($level) === QTY_FMT_CONSERVATIVE)) {
 					$new_quantity = $temp_supplied_qty * .25; 
 				}
-				else {
+				elseif (strtolower(trim($level) === QTY_FMT_NONE)) {
 					$new_quantity = $temp_supplied_qty; 
 				}
 			}
@@ -117,21 +115,19 @@ class DobaProductFile {
 	
 	/**
 	 * Adjusts the price as necessary and returns the new wholesale cost to be supplied to the 
-	 * DobaProductData object
+	 * 		DobaProductData object
 	 * @return the wholesale cost
-	 * @param $tempHeaders Object
-	 * @param $tempValues Object
-	 * @param $tempWholesale Object
-	 * @param $tempMap Object
-	 * @param $tempMSRP Object
+	 * @param $tempHeaders array
+	 * @param $tempValues array
+	 * @param $tempWholesale float
+	 * @param $tempMap float
+	 * @param $tempMSRP float
 	 */
 	function setPrice($tempHeaders, $tempValues, $tempWholesale, $tempMap, $tempMSRP) {
-		// Check for optional headers that would affect the price loaded 
-		// into the DobaProductData object
 		$wholesale = $tempWholesale;
 		$map = $tempMap;
 		$msrp = $tempMSRP;
-		$new_cost = $tempWholesale;	
+		$new_cost = $wholesale;	
 		$headers = $tempHeaders;
 		$values = $tempValues;	
 		if (in_array('OSC_WHOLESALE_MARKUP_PERCENT', $headers)) {
@@ -185,7 +181,7 @@ class DobaProductFile {
 			}
 		}
 		
-		return new_cost;
+		return $new_cost;
 	}
 	
 	/**
@@ -263,7 +259,7 @@ class DobaProductFile {
 			
 			$temp = array_keys($headers, 'QTY_AVAIL');
 		    $supplied_qty = $values[$temp[0]];
-			$tempDPD->$quantity(DobaProductFile::setQuantity($headers, $values, $supplied_qty));
+			$tempDPD->quantity(DobaProductFile::setQuantity($headers, $values, $supplied_qty));
 			
 			$temp = array_keys($headers, 'IMAGE_URL');
 			$tempDPD->image_url(DobaProductFile::pruneQuotes($values[$temp[0]]));
@@ -276,13 +272,21 @@ class DobaProductFile {
 			
 			$temp = array_keys($headers, 'PRICE');
 			$wholesale = $values[$temp[0]];
+			//$tempDPD->price($wholesale);
 			
 			$temp = array_keys($headers, 'MAP');
 			$map = $values[$temp[0]];
 			
 			$temp = array_keys($headers, 'MSRP');
 			$msrp = $values[$temp[0]];
-			$tempDPD->$price(DobaProductFile::setPrice($headers, $values, $wholesale, $map, $msrp));
+			$tempDPD->price(DobaProductFile::setPrice($headers, $values, $wholesale, $map, $msrp));
+			
+			if (in_array('OSC_PRODUCT_LINK', $headers)) {
+				$temp = array_keys($headers, 'OSC_PRODUCT_LINK');
+				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+					$tempDPD->product_url($values[$temp[0]]);
+				}
+			}
 			
 			$DobaProds->addProduct($tempDPD);
 		} 
