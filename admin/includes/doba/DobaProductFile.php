@@ -71,8 +71,6 @@ class DobaProductFile {
 		return $str;
 	}
 	
-	// "123"
-	
 	/**
 	 * Takes the headers and values array and adjusts the quantity to be provided to the
 	 * 		DobaProductData object
@@ -244,7 +242,7 @@ class DobaProductFile {
 			$tempDPD->title(DobaProductFile::pruneQuotes($values[$temp[0]]));
 			
 			$temp = array_keys($headers, 'MSRP');
-			$tempDPD->price($values[$temp[0]]);
+			$tempDPD->price($values[$temp[0]]);         //<<<<< Possable bug should this be here if there is another below?
 			
 			$temp = array_keys($headers, 'DESCRIPTION');
 			$descr = DobaProductFile::pruneQuotes($values[$temp[0]]);

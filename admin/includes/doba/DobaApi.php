@@ -264,6 +264,12 @@ class DobaApi {
 		return $xml;
 	}
 
+	/**
+	 * A function to compile the XML request for a product inventory.
+	 * 		param should have the watchlist ID that is beeing requested.
+	 * @return an XML string
+	 * @param $data Object[optional]
+	 */
 	function getProductInventoryXml($data=array()) {
 		if (!$this->isEnabled()) {
 			$this->addErrorMsg('Doba API is not enabled.');
@@ -274,7 +280,9 @@ class DobaApi {
 		}
 		
 		// compile the getProductInventory XML code
-		$xml = '';
+		$xml = '<watchlists>
+					<watchlist>'.$data[0].'</watchlist>
+				</watchlists>';
 		
 		return $xml;
 	}
@@ -289,7 +297,7 @@ class DobaApi {
 		}
 		
 		// compile the getWatchLists XML code
-		$xml = '';
+		$xml = ''; // According to API doc this should be enough....
 		
 		return $xml;
 	}
