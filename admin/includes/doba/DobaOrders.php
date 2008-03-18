@@ -45,5 +45,29 @@ class DobaOrders {
 		}
 		return false;
 	}
+	
+	/**
+	 * @todo make work with db
+	 * Pulls orders by sent to Doba status
+	 * @return bool
+	 * @param $status string
+	 */
+	function loadOrders($status)
+	{
+		require_once('includes/configure.php');
+		require_once(DIR_WS_FUNCTIONS . 'database.php');
+
+		$orders = array();
+  		$orders_query = tep_db_query("select * from " . TABLE_ORDERS);
+  		while ($order = tep_db_fetch_array($orders_query)) {
+    		$orders[] = $order;
+  		}
+		
+		echo "<pre>";
+		print_r($orders);
+		echo "</pre>";
+		
+		return true;
+	}
 }
 ?>

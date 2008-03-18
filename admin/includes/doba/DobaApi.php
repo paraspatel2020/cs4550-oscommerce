@@ -312,8 +312,25 @@ class DobaApi {
 		}
 		
 		// compile the orderLookup XML code
-		$xml = '';
+		$xml = '
+			<shipping_state>' . $data['state'] . '</shipping_state>
+			<shipping_postal>' . $data['postal'] . '</shipping_postal>
+			<shipping_country>' . $data['country'] . '</shipping_country>
+		';
 		
+		if (isset($data['items']) && is_array($data['items']) && count($data['items']) > 0) {
+			$xml .= '<items>';
+			foreach ($data['items'] as $item) {
+				$xml .= '		
+					<item>
+	        			<item_id>' . $item['item_id'] . '</item_id>
+						<quantity>' . $item['quantity'] . '</quantity>
+					</item>
+				';	
+			}
+			$xml .= '</items>';
+		}	
+
 		return $xml;
 	}
 
@@ -328,13 +345,14 @@ class DobaApi {
 		
 		// compile the createOrder XML code
 		$xml = '
-			<shipping_firstname>' . $data['firstname'] . '</shipping_firstname>
-			<shipping_lastname>' . $data['lastname'] . '</shipping_lastname>
-			<shipping_street>' . $data['address1'] . '</shipping_street>
+			<po_number>' .  $data['po_number'] . '</po_number>
+			<shipping_firstname>' . $data['first_name'] . '</shipping_firstname>
+			<shipping_lastname>' . $data['last_name'] . '</shipping_lastname>
+			<shipping_street>' . $data['address1'] . ' ' . $data['address2'] . '</shipping_street>
 			<shipping_city>' . $data['city'] . '</shipping_city>
 			<shipping_state>' . $data['state'] . '</shipping_state>
 			<shipping_postal>' . $data['postal'] . '</shipping_postal>
-			<shipping_country>US</shipping_country>
+			<shipping_country>' . $data['country'] . '</shipping_country>
 			';
 
 		if (isset($data['items']) && is_array($data['items']) && count($data['items']) > 0) {
@@ -342,8 +360,8 @@ class DobaApi {
 			foreach ($data['items'] as $item) {
 				$xml .= '		
 					<item>
-	        			<item_id>' . $item['id'] . '</item_id>
-						<quantity>' . $item['qty'] . '</quantity>
+	        			<item_id>' . $item['item_id'] . '</item_id>
+						<quantity>' . $item['quantity'] . '</quantity>
 					</item>
 				';	
 			}
@@ -361,9 +379,14 @@ class DobaApi {
 			$this->addErrorMsg('No data available to submit to the Doba API.');
 			return '';
 		}
-		
+
 		// compile the fundOrder XML code
-		$xml = '';
+		$xml = '
+        	<order_ids>
+		    	<order_id>' . $data['order_id'] .'</order_id>
+			</order_ids>
+			<fund_method>default_payment_account</fund_method>
+		';
 		
 		return $xml;
 	}
@@ -378,7 +401,11 @@ class DobaApi {
 		}
 		
 		// compile the getOrderDetail XML code
-		$xml = '';
+		$xml = '
+        	<order_ids>
+		    	<order_id>' . $data['order_id'] .'</order_id>
+			</order_ids>
+		';
 		
 		return $xml;
 	}

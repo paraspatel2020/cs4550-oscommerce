@@ -2,7 +2,7 @@
 class DobaOrderInfo
 {
 	/**
-	 * @var int
+	 * @var int : orders id in this oscommerce implementation
 	 */
 	var $po_number;
 	

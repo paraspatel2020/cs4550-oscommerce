@@ -7,12 +7,21 @@ $api = new DobaApi();
 // change the following variables to have the data you wish to submit
 $action = DOBA_API_ACTION_CREATEORDER;
 $data = array(
-	'firstname' => '',
-	'lastname' => '',
-	'address1' => '',
-	'city' => '',
-	'state' => '',
-	'postal'=> ''
+	'po_number' => '95738',
+	'first_name' => 'Brittany',
+	'last_name' => 'Kearns',
+	'address1' => '6894 W 49th Street',
+	'address2' => '',
+	'city' => 'Eugene',
+	'state' => 'OR',
+	'postal'=> '97563',
+	'country' => 'US',
+	'items' => array(
+		array(
+			'item_id' => '623746',
+			'quantity' => '1'
+		)
+	)
 );
 // end fields to be changed
 
