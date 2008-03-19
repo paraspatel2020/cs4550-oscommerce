@@ -193,5 +193,117 @@ class DobaInteraction {
 			
 		return $cnt;
 	}
+	
+	/**
+	 * Takes the headers and values array and adjusts the quantity to be provided to the
+	 * 		DobaProductData object
+	 * @return integer representing the new quantity or the existing one if no changes are made.
+	 * @param $tempHeaders array
+	 * @param $tempValues array
+	 * @param $temp_supplied_qty int
+	 */
+	function setQuantity($tempHeaders, $tempValues, $temp_supplied_qty) {
+		$headers = $tempHeaders;
+		$values = $tempValues;
+		$new_quantity = $temp_supplied_qty;
+		if (in_array('OSC_QUANTITY_AUTOADJUST', $headers)) {
+			$temp = array_keys($headers,'OSC_QUANTITY_AUTOADJUST');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$level = $values[$temp[0]];
+				
+				if (strtolower(trim($level) === QTY_FMT_NORMAL)) {
+					$new_quantity = $temp_supplied_qty * .5; 
+				}
+				elseif (strtolower(trim($level) === QTY_FMT_LIBERAL)) {
+					$new_quantity = $temp_supplied_qty * .75; 
+				}
+				elseif (strtolower(trim($level) === QTY_FMT_CONSERVATIVE)) {
+					$new_quantity = $temp_supplied_qty * .25; 
+				}
+				elseif (strtolower(trim($level) === QTY_FMT_NONE)) {
+					$new_quantity = $temp_supplied_qty; 
+				}
+			}
+		}
+		elseif (in_array('OSC_QUANTITY_EXACT', $headers)) {
+			$temp = array_keys($headers,'OSC_QUANTITY_EXACT');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$new_quantity = $values[$temp[0]];
+			}
+		}
+		return round($new_quantity);
+	}
+	
+	/**
+	 * Adjusts the price as necessary and returns the new wholesale cost to be supplied to the 
+	 * 		DobaProductData object
+	 * @return the wholesale cost
+	 * @param $tempHeaders array
+	 * @param $tempValues array
+	 * @param $tempWholesale float
+	 * @param $tempMap float
+	 * @param $tempMSRP float
+	 */
+	function setPrice($tempHeaders, $tempValues, $tempWholesale, $tempMap, $tempMSRP) {
+		$wholesale = $tempWholesale;
+		$map = $tempMap;
+		$msrp = $tempMSRP;
+		$new_cost = $wholesale;	
+		$headers = $tempHeaders;
+		$values = $tempValues;	
+		if (in_array('OSC_WHOLESALE_MARKUP_PERCENT', $headers)) {
+			$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_PERCENT');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$percent = $values[$temp[0]];
+				if ($percent > 1) {
+					$percent = $percent / 100;
+				}
+				$new_cost = $wholesale * (1 + $percent);
+				
+				if ($map > 0 && $new_cost < $map) {
+					$new_cost = $map;
+				}
+			}				
+		}
+		elseif (in_array('OSC_WHOLESALE_MARKUP_DOLLAR', $headers)) {
+			$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_DOLLAR');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$markup = $values[$temp[0]];
+				$new_cost = $wholesale + $markup;
+				
+				if ($map > 0 && $new_cost < $map) {
+					$new_cost = $map;
+				}
+			}
+		}
+		elseif (in_array('OSC_MSRP_MARKUP_PERCENT', $headers)) {
+			$temp = array_keys($headers, 'OSC_MSRP_MARKUP_PERCENT');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$percent = $values[$temp[0]];
+				if ($percent > 1) {
+					$percent = $percent / 100;
+				}
+				$new_cost = $msrp * (1 + $percent);
+				
+				if ($map > 0 && $new_cost < $map) {
+					$new_cost = $map;
+				}
+			}
+		}
+		elseif (in_array('OSC_MSRP_MARKUP_DOLLAR', $headers)) {
+			$temp = array_keys($headers, 'OSC_MSRP_MARKUP_DOLLAR');
+			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
+				$markup = $values[$temp[0]];
+				$new_cost = $msrp + $markup;
+				
+				if ($map > 0 && $new_cost < $map) {
+					$new_cost = $map;
+				}
+			}
+		}
+		
+		return $new_cost;
+	}
+	
 }
 ?>
