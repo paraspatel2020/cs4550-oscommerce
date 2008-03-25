@@ -46,6 +46,8 @@ class DobaOrderInfo
 	 */
 	var $country;
 
+	//var $items = array();
+
 	/**
 	 * @var int
 	 */
