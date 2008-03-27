@@ -32,24 +32,26 @@ class DobaProductAPI {
 				
 		$WatchDetails = $p->getOutput();
 		
+		$retWatchlstInfo = array();
+		
 		if ($WatchDetails['dce']['response']['outcome'] == 'Success')
 		{			
 			if (array_key_exists('watchlist',$WatchDetails['dce']['response']['watchlists']))
 			{
 				//Only 1 watchlist;
 				
-				$Watchlst = $WatchDetails['dce']['response']['watchlists']['watchlist'];
-							
-				//Need some kind of watchlist object here to store and return the data in.
+				$retWatchlstInfo[0] = $WatchDetails['dce']['response']['watchlists']['watchlist'];
 			}
 			else
 			{
+				$cnt =0;
 				foreach($WatchDetails['dce']['response']['watchlists'] as $wtch)
 				{
-					//Need some kind of watchlist object here to store and return the data in.				
+					$retWatchlstInfo[cnt] = $wtch;
+					$cnt++;
 				}				
 			}
-			//return $productList;
+			return $retWatchlstInfo;
 		}
 		else
 		{
@@ -61,11 +63,13 @@ class DobaProductAPI {
 	{		
 		$productList = new DobaProducts();
 		$p = new XMLParser($data);	
-				
+			
 		$ProdDetails = $p->getOutput();
-		
-		if ($ProdDetails['dce']['response']['outcome'] == 'Success')
-		{			
+//echo '<pre>';
+//echo print_r($ProdDetails);
+//echo '</pre>';
+		if ($ProdDetails['dce']['response']['outcome'] == 'success')
+		{		
 			if (array_key_exists('product',$ProdDetails['dce']['response']['products']))
 			{
 				//Only 1 product;
