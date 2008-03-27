@@ -12,7 +12,7 @@ define('DOBA_API_ACTION_GETPRICERANGES', 		'getPriceRanges');
 define('DOBA_API_ACTION_GETPRODUCTSEARCH', 		'getProductSearch');
 define('DOBA_API_ACTION_GETPRODUCTDETAIL', 		'getProductDetail');
 define('DOBA_API_ACTION_GETPRODUCTINVENTORY', 	'getProductInventory');
-define('DOBA_API_ACTION_GETWATCHLISTS', 		'getWatchLists');
+define('DOBA_API_ACTION_GETWATCHLISTS', 		'getWatchlists');
 define('DOBA_API_ACTION_ORDERLOOKUP', 			'orderLookup');
 define('DOBA_API_ACTION_CREATEORDER', 			'createOrder');
 define('DOBA_API_ACTION_FUNDORDER', 			'fundOrder');
@@ -119,18 +119,18 @@ class DobaApi {
 		} else if (!defined('DOBA_API_ACTION_' . strtoupper($action))) {
 			$this->addErrorMsg('"' . $action . '" does not exist or is not available for use.');
 			return false;
-		} else if (count($data) == 0) {
-			$this->addErrorMsg('No data available to submit to the Doba API.');
-			return false;
-		}
-		
+		} //else if (count($data) == 0) {
+			//$this->addErrorMsg('No data available to submit to the Doba API.');
+			//return false;
+		//}
+
 		$data_xml = trim($this->dataToXml($action, $data));
 		
-		if ($data_xml == '') {
-			$this->addErrorMsg('No XML was compiled from the data submitted.');
-			return false;
-		}
-		
+		//if ($data_xml == '') {
+		//	$this->addErrorMsg('No XML was compiled from the data submitted.');
+		//	return false;
+		//}
+	
 		$this->requestXml = '
 			<dce>
 				<request>
@@ -139,11 +139,13 @@ class DobaApi {
 						<password>' . $this->password . '</password>
 					</authentication>
 					<retailer_id>' . $this->retailer_id . '</retailer_id>
-					<action>' . $action . '</action>
+					<action>' . $action . '</action>				
 					' . $data_xml . '
 				</request>
 			</dce>';
-			
+			echo '<pre>';
+			echo $this->requestXml;
+			echo '</pre>';
 		return true;
 	}
 	
@@ -159,10 +161,10 @@ class DobaApi {
 		} else if (!defined('DOBA_API_ACTION_' . strtoupper($action))) {
 			$this->addErrorMsg('"' . $action . '" does not exist or is not available for use.');
 			return '';
-		} else if (count($data) == 0) {
-			$this->addErrorMsg('No data available to submit to the Doba API.');
-			return '';
-		}
+		}// else if (count($data) == 0) {
+		//	$this->addErrorMsg('No data available to submit to the Doba API.');
+		//	return '';
+		//}
 		
 		$method = $action . 'Xml';
 		
@@ -259,7 +261,9 @@ class DobaApi {
 		}
 		
 		// compile the getProductDetail XML code
-		$xml = '';
+		$xml = '<watchlists>
+					<watchlist>'.$data['watchlist_id'].'</watchlist>
+				</watchlists>';
 		
 		return $xml;
 	}
@@ -278,23 +282,21 @@ class DobaApi {
 			$this->addErrorMsg('No data available to submit to the Doba API.');
 			return '';
 		}
-		
+
 		// compile the getProductInventory XML code
-		$xml = '<watchlists>
-					<watchlist>'.$data[0].'</watchlist>
-				</watchlists>';
+		$xml = '';
 		
 		return $xml;
 	}
 
-	function getWatchListsXml($data=array()) {
+	function getWatchlistsXml($data=array()) {
 		if (!$this->isEnabled()) {
 			$this->addErrorMsg('Doba API is not enabled.');
 			return '';
-		} else if (count($data) == 0) {
-			$this->addErrorMsg('No data available to submit to the Doba API.');
-			return '';
-		}
+		} //else if (count($data) == 0) {
+			//$this->addErrorMsg('No data available to submit to the Doba API.');
+		//	return '';
+		//}
 		
 		// compile the getWatchLists XML code
 		$xml = ''; // According to API doc this should be enough....
