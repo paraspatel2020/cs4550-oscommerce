@@ -89,12 +89,12 @@ class DobaInteraction {
 				$products_description = $prod->description();
 				
 				
-				$sql_prod .= '(' . $products_id . ', ' . $products_quantity . ', "' . tep_db_prepare_input($products_model) . '", 
-							"' . tep_db_prepare_input($products_image) . '", ' . $products_price . ', ' . $products_last_modified . ', 
+				$sql_prod .= '(' . $products_id . ', ' . $products_quantity . ', "' . addslashes(tep_db_prepare_input($products_model)) . '", 
+							"' . addslashes(tep_db_prepare_input($products_image)) . '", ' . $products_price . ', ' . $products_last_modified . ', 
 							' . $products_weight . ', ' . $products_status . ', ' . $products_tax_class_id . ', ' . $manufacturers_id . ')';
 				$sql_cat .= '(' . $products_id . ', ' . $categories_id . ')';
-				$sql_descr .= '(' . $products_id . ', ' . $language_id . ', "' . tep_db_prepare_input($products_name) . '", 
-							"' . tep_db_prepare_input($products_description) . '")';
+				$sql_descr .= '(' . $products_id . ', ' . $language_id . ', "' . addslashes(tep_db_prepare_input($products_name)) . '", 
+							"' . addslashes(tep_db_prepare_input($products_description)) . '")';
 			}
 			
 			if ($can_insert) {

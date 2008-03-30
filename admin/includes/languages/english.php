@@ -300,9 +300,9 @@ define('SUCCESS_FILE_SAVED_SUCCESSFULLY', 'Success: File upload saved successful
 define('WARNING_NO_FILE_UPLOADED', 'Warning: No file uploaded.');
 define('WARNING_FILE_UPLOADS_DISABLED', 'Warning: File uploads are disabled in the php.ini configuration file.');
 
-// DobA box text in includes/boxes/doba.php
+// Doba box text in includes/boxes/doba.php
 define('BOX_HEADING_DOBA', 'Doba');
-define('BOX_DOBA_CONFIG', 'Configuration');
-define('BOX_DOBA_UPLOAD_PRODUCT_DATA', 'Upload Products');
-define('BOX_DOBA_DOWNLOAD_ORDER_DATA', 'Download Orders');
+define('BOX_DOBA_STATS', 'Statistics');
+define('BOX_DOBA_PRODUCTS', 'Products');
+define('BOX_DOBA_ORDERS', 'Orders');
 ?>
