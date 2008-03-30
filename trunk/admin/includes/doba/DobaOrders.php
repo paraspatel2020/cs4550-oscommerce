@@ -47,7 +47,6 @@ class DobaOrders {
 	}
 	
 	/**
-	 * @todo make work with db
 	 * Pulls orders by sent to Doba status
 	 * @return bool
 	 * @param $status string
@@ -63,11 +62,17 @@ class DobaOrders {
     		$orders[] = $order;
   		}
 		
-		echo "<pre>";
-		print_r($orders);
-		echo "</pre>";
-		
 		return true;
+	}
+	
+	function toArray() {
+		$ret = array();
+		
+		foreach ($this->orders as $o) {
+			$ret[] = $o->toArray();
+		}
+		
+		return $ret;
 	}
 }
 ?>

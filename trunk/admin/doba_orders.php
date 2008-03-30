@@ -16,32 +16,87 @@ $downloaded = true;
 require_once('doba/DobaOrders.php');
 require_once('doba/DobaInteraction.php');	
 require_once('doba/DobaLog.php');
+include_once('doba/DobaApi.php');
+
+$api = new DobaApi();
+$msg = '';
 		
 if (isset($_POST['ordergroup'])) {
 	require_once('doba/DobaOrderFile.php');
 	
 	$ordergroup = trim($_POST['ordergroup']);
 	$objDobaOrders = DobaInteraction::loadOrders($ordergroup);
-	if (is_a($objDobaOrders, 'DobaOrders')) {
-		$now = time();
-		$filename = 'orders_'.date('YmdHis', $now).'.tab';
-		// make this header replace previous headers
-		header('Content-Type: application/octet-stream', true);
-		header('Content-Disposition: attachment; '
-       				.'filename="'.$filename.'"');
-		$objDobaOrderFile = new DobaOrderFile();
-		$objDobaOrderFile->processData($objDobaOrders);
-		
-		if ($ordergroup == 'new') {
-			DobaLog::logOrderDownload($objDobaOrders, $filename, $now);
+	$now = time();
+	
+	if ($_POST['act'] == 'download') {
+		if (is_a($objDobaOrders, 'DobaOrders')) {
+			$filename = 'orders_'.date('YmdHis', $now).'.tab';
+			// make this header replace previous headers
+			header('Content-Type: application/octet-stream', true);
+			header('Content-Disposition: attachment; '
+	       				.'filename="'.$filename.'"');
+			$objDobaOrderFile = new DobaOrderFile();
+			$objDobaOrderFile->processData($objDobaOrders);
+			
+			if ($ordergroup == 'new') {
+				DobaLog::logOrderDownload($objDobaOrders, $filename, $now);
+			}
+			
+			exit();
 		}
+		$downloaded = false;
+	} else if ($_POST['act'] == 'api_send') {
+		include_once('doba/DobaOrdersAPI.php');
 		
-		exit();
+		$action = DOBA_API_ACTION_CREATEORDER;
+		$o_data = DobaOrdersAPI::prepOrdersForSubmission($objDobaOrders);
+		$success_ids = $failure_ids = array();
+		
+		foreach ($o_data as $id => $data) {
+			if ($api->compileRequestXml($action, $data) && $api->sendRequest()) {
+				$cor = DobaOrdersAPI::parseCreateOrderResponse($api->getResponseXml());
+				if ($cor === 'success') {
+					$success_ids[] = $id;
+				} else {
+					$failure_ids[] = $id;
+				}				
+			} else if ($api->hasErrors()) {
+				$failure_ids[] = $id;
+			} else {	
+				$failure_ids[] = $id;
+			}
+		}
+
+		if (count($success_ids) > 0) {
+			DobaLog::logOrderApiSend($objDobaOrders, 'submitted order(s): ' . implode(', ', $success_ids), null, $success_ids);
+		}
+		if (count($success_ids) > 0) {
+			if (strlen($msg) > 0) {
+				$msg .= '<br>';
+			}
+			if (count($success_ids) == 1) {
+				$msg .= 'Order ' . implode(', ', $success_ids) . ' was successfully submitted to Doba.';
+			} else {
+				$msg .= 'Orders ' . implode(', ', $success_ids) . ' were successfully submitted to Doba.';
+			}
+			 
+		}
+		if (count($failure_ids) > 0) {
+			if (strlen($msg) > 0) {
+				$msg .= '<br>';
+			}
+			$msg .= (count($failure_ids) == 1) ? 'Order ' : 'Orders ';
+			$msg .= implode(', ', $failure_ids) . ' could not be submitted to Doba for one or more of the following reasons:<br>
+					- it has already been submitted<br>
+					- the product doesn\'t exist on Doba<br>
+					- the product does not have enough stock to complete the order<br>
+					Please log into Doba to verify.'; 
+		}
+	} else {
+		// this was an unrecognized action
 	}
-	$downloaded = false;
 }
 
-$msg = '';
 if (!$downloaded) {
 	$msg = FILE_DOWNLOAD_ERROR;
 }
@@ -93,7 +148,8 @@ $download_history = DobaLog::getLogHistorySummary('order');
 					echo '<p><em>'.$msg.'</em></p>';
 				}
 			?>
-			<form action="doba_order_download.php" method="post">
+			<form action="doba_orders.php" method="post">
+				<input type="hidden" name="act" id="act" value="download">
 				<table class="data">
 					<tr <?php if ($order_cnt_new == 0) { echo ' class="disabled"'; } ?>>
 						<td>
@@ -140,12 +196,17 @@ $download_history = DobaLog::getLogHistorySummary('order');
 						<td>(<?php echo $order_cnt_unsubmitted.' '.AVAILABLE; ?>)</td>
 					</tr>
 					<tr class="noborder">
-						<td colspan="3"><input type="submit" name="submit" value="<?php echo FORM_DOWNLOAD_FILE; ?>"></td>
+						<td colspan="3">
+								<input type="submit" name="submit" value="<?php echo FORM_DOWNLOAD_FILE; ?>" onClick="document.getElementById('act').value='download';">
+								<?php if (DOBA_API_ENABLED === true) { ?>
+									<input type="submit" name="submit" value="<?php echo FORM_SEND_FILE_TO_DOBA; ?>" onClick="document.getElementById('act').value='api_send';" style="margin-left: 10px;">
+								<?php } ?>
+							</td>
 					</tr>					
 				</table>
 			</form>
 		
-			<p><strong><?php echo DOWNLOAD_HISTORY; ?></strong></p>
+			<p><strong><?php echo ORDER_HISTORY; ?></strong> (last 10)</p>
 			<table class="data">
 				<thead>
 					<tr>

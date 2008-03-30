@@ -51,7 +51,8 @@
   define('FILENAME_WHOS_ONLINE', 'whos_online.php');
   define('FILENAME_ZONES', 'zones.php');
 
-  define('FILENAME_DOBA_CONFIG', 'doba_configure.php');
-  define('FILENAME_DOBA_PRODUCT_UPLOAD', 'doba_product_upload.php');
-  define('FILENAME_DOBA_ORDER_DOWNLOAD', 'doba_order_download.php');
+  define('FILENAME_DOBA_STATS', 'doba_stats.php');
+  define('FILENAME_DOBA_PRODUCTS', 'doba_products.php');
+  define('FILENAME_DOBA_ORDERS', 'doba_orders.php');
+  define('FILENAME_DOBA_API_PRODUCTS', 'doba_api_products.php');
 ?>

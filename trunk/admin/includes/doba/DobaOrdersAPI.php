@@ -13,6 +13,41 @@ class DobaOrdersAPI {
 	function DobaOrdersAPI() {
 		
 	}
+		
+	/**
+	 * Parse a DobaOrders object into an array ready for the Doba API
+	 * @return array
+	 * @param $objDobaOrders DobaOrders
+	 */
+	function prepOrdersForSubmission($objDobaOrders) {
+		$ret = array();
+		$tmp = $objDobaOrders->toArray();
+		
+		foreach ($tmp as $t) {
+			if (!isset($ret[$t['po_number']])) {
+				$ret[$t['po_number']] = array(
+					'po_number' => $t['po_number'],
+					'first_name' => $t['first_name'],
+					'last_name' => $t['last_name'],
+					'address1' => $t['address1'],
+					'address2' => $t['address2'],
+					'city' => $t['city'],
+					'state' => $t['state'],
+					'postal' => $t['postal'],
+					'country' => $t['country'],
+					'items' => array()					
+				);
+			}
+				
+			$ret[$t['po_number']]['items'][] = array(
+				'item_id' => $t['item_id'],
+				'quantity' => $t['quantity'],
+				'max_expected_total' => $t['max_expected_total']
+			);
+		}
+		
+		return $ret;
+	}
 	
 	function parseOrderLookupResponse($data)
 	{

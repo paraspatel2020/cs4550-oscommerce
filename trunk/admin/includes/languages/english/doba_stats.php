@@ -2,7 +2,7 @@
 /*
   $Id: $
 
-  Doba     Product Sourcing Simplified
+  Doba     Inventory on Demand
   http://www.doba.com
 
   Copyright (c) 2008 Doba
@@ -10,10 +10,10 @@
   Released under the GNU General Public License
 */
 
-define('HEADING_TITLE', 'Doba Configuration');
+define('HEADING_TITLE', 'Doba Statistics');
 
-define('UPLOAD_HISTORY', 'Product Upload History');
-define('DOWNLOAD_HISTORY', 'Order Download History');
+define('UPLOAD_HISTORY', 'Product Update History');
+define('DOWNLOAD_HISTORY', 'Order Submission History');
 define('TABLE_HEAD_DATE', 'Date');
 define('TABLE_HEAD_XFER_METHOD', 'Transfer Method');
 define('TABLE_HEAD_FILENAME', 'Filename');

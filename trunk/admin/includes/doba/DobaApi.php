@@ -1,9 +1,9 @@
 <?php
 require_once('DobaAuth.inc');
 
-define('DOBA_PAGE', 		'/api/xml_retailer_api.php');
-define('DOBA_URL_SANDBOX', 	'https://sandbox.doba.com' . DOBA_PAGE);
-define('DOBA_URL_LIVE', 	'https://www.doba.com' . DOBA_PAGE);
+define('DOBA_PAGE', 			'/api/xml_retailer_api.php');
+define('DOBA_DOMAIN_SANDBOX', 	'sandbox.doba.com');
+define('DOBA_DOMAIN_LIVE', 		'www.doba.com');
 
 define('DOBA_API_ACTION_GETSUPPLIERS', 			'getSuppliers');
 define('DOBA_API_ACTION_GETBRANDS', 			'getBrands');
@@ -19,6 +19,7 @@ define('DOBA_API_ACTION_FUNDORDER', 			'fundOrder');
 define('DOBA_API_ACTION_GETORDERDETAIL', 		'getOrderDetail');
 
 class DobaApi {
+	var $site_url;
 	var $api_url;
 	var $username;
 	var $password;
@@ -31,7 +32,8 @@ class DobaApi {
 	var $errors = array();
 	
 	function DobaApi() {
-		$this->api_url = (DOBA_TEST_MODE_ENABLED === true) ? DOBA_URL_SANDBOX : DOBA_URL_LIVE;
+		$this->site_url = (DOBA_TEST_MODE_ENABLED === true) ? 'http://' . DOBA_DOMAIN_SANDBOX : 'http://' . DOBA_DOMAIN_LIVE;
+		$this->api_url = (DOBA_TEST_MODE_ENABLED === true) ? 'https://' . DOBA_DOMAIN_SANDBOX . DOBA_PAGE : 'https://' . DOBA_DOMAIN_LIVE . DOBA_PAGE;
 		$this->username = DOBA_USERNAME;
 		$this->password = DOBA_PASSWORD;
 		$this->retailer_id = DOBA_RETAILER_ID;
@@ -119,17 +121,9 @@ class DobaApi {
 		} else if (!defined('DOBA_API_ACTION_' . strtoupper($action))) {
 			$this->addErrorMsg('"' . $action . '" does not exist or is not available for use.');
 			return false;
-		} //else if (count($data) == 0) {
-			//$this->addErrorMsg('No data available to submit to the Doba API.');
-			//return false;
-		//}
+		}
 
 		$data_xml = trim($this->dataToXml($action, $data));
-		
-		//if ($data_xml == '') {
-		//	$this->addErrorMsg('No XML was compiled from the data submitted.');
-		//	return false;
-		//}
 	
 		$this->requestXml = '
 			<dce>
@@ -143,9 +137,7 @@ class DobaApi {
 					' . $data_xml . '
 				</request>
 			</dce>';
-			echo '<pre>';
-			echo $this->requestXml;
-			echo '</pre>';
+			
 		return true;
 	}
 	
@@ -161,10 +153,7 @@ class DobaApi {
 		} else if (!defined('DOBA_API_ACTION_' . strtoupper($action))) {
 			$this->addErrorMsg('"' . $action . '" does not exist or is not available for use.');
 			return '';
-		}// else if (count($data) == 0) {
-		//	$this->addErrorMsg('No data available to submit to the Doba API.');
-		//	return '';
-		//}
+		}
 		
 		$method = $action . 'Xml';
 		
@@ -293,10 +282,7 @@ class DobaApi {
 		if (!$this->isEnabled()) {
 			$this->addErrorMsg('Doba API is not enabled.');
 			return '';
-		} //else if (count($data) == 0) {
-			//$this->addErrorMsg('No data available to submit to the Doba API.');
-		//	return '';
-		//}
+		}
 		
 		// compile the getWatchLists XML code
 		$xml = ''; // According to API doc this should be enough....

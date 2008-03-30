@@ -27,36 +27,14 @@ class DobaProductAPI {
             </watchlist>
         </watchlists> 
 		 */
-		//$productList = new DobaProducts();
 		$p = new XMLParser($data);	
 				
 		$WatchDetails = $p->getOutput();
-		
-		$retWatchlstInfo = array();
-		
-		if ($WatchDetails['dce']['response']['outcome'] == 'Success')
-		{			
-			if (array_key_exists('watchlist',$WatchDetails['dce']['response']['watchlists']))
-			{
-				//Only 1 watchlist;
 				
-				$retWatchlstInfo[0] = $WatchDetails['dce']['response']['watchlists']['watchlist'];
-			}
-			else
-			{
-				$cnt =0;
-				foreach($WatchDetails['dce']['response']['watchlists'] as $wtch)
-				{
-					$retWatchlstInfo[cnt] = $wtch;
-					$cnt++;
-				}				
-			}
-			return $retWatchlstInfo;
-		}
-		else
-		{
-			return $WatchDetails['dce']['response']['outcome'];
-		}		
+		return array(
+			'response' => $WatchDetails['dce']['response']['outcome'],
+			'data' => (isset($WatchDetails['dce']['response']['watchlists'])) ? $WatchDetails['dce']['response']['watchlists'] : array()
+		);
 	}	
 	
 	function parseProductDetails($data)
@@ -65,37 +43,26 @@ class DobaProductAPI {
 		$p = new XMLParser($data);	
 			
 		$ProdDetails = $p->getOutput();
-//echo '<pre>';
-//echo print_r($ProdDetails);
-//echo '</pre>';
+
 		if ($ProdDetails['dce']['response']['outcome'] == 'success')
 		{		
 			if (array_key_exists('product',$ProdDetails['dce']['response']['products']))
 			{
 				//Only 1 product;
-				
 				$prod = $ProdDetails['dce']['response']['products']['product'];
-				
 				$tempDPDArray = DobaProductAPI::findItems($prod);
 				
 				foreach($tempDPDArray as $currProd)
 				{
 					$currProd->product_id($prod['product_id']);
-					
 					$currProd->title($prod['title']);
-					
 					$currProd->description($prod['description']);
-					
 					DobaProductAPI::findImage($prod, $currProd);
-					
 					$currProd->product_sku($prod['product_sku']);
-					
 					$currProd->ship_weight($prod['ship_weight']);
-					
 					//$currProd->ship_cost($prod['ship_cost']);
 					//$currProd->upc($prod['upc']);
 					//$currProd->brand($prod['brand']);
-				
 					$productList->addProduct($currProd);							
 				}				
 			}
@@ -108,21 +75,14 @@ class DobaProductAPI {
 					foreach($tempDPDArray as $currProd)
 					{
 						$currProd->product_id($prod['product_id']);
-						
 						$currProd->title($prod['title']);
-						
 						$currProd->description($prod['description']);
-						
 						DobaProductAPI::findImage($prod, $currProd);
-						
 						$currProd->product_sku($prod['product_sku']);
-						
 						$currProd->ship_weight($prod['ship_weight']);
-						
 						//$currProd->ship_cost($prod['ship_cost']);
 						//$currProd->upc($prod['upc']);
 						//$currProd->brand($prod['brand']);
-					
 						$productList->addProduct($currProd);							
 					}				
 				}				
@@ -133,38 +93,6 @@ class DobaProductAPI {
 		{
 			return $ProdDetails['dce']['response']['outcome'];
 		}
-		
-		/*
-		  	<product>
-				</product_id>
-                </title>
-                
-                </supplier_id>
-                </supplier_name>
-                </supplier_pro_name>
-                </product_sku>
-                </upc>
-                </brand>
-                
-                </description>
-                </ship_width>
-                </ship_length>
-                </ship_height>
-                </ship_weight>
-                </ship_cost>
-                
-                <items>            
-					<!-----other funcion-------->
-                </items>
-                
-                <images>
-					<!-----other funcion-------->
-                <images>
-                
-                <supplier_id>
-                <supplier_name>     
-			</product>           
-		 */
 	}
 
 	function findItems($ItemDetails)	

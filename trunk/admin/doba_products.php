@@ -12,9 +12,35 @@ ini_set('include_path', ini_get('include_path').':'.$_SERVER['DOCUMENT_ROOT'].'/
 */
 
 require('includes/application_top.php');
-require_once('doba/DobaLog.php');
 
-$download_history = DobaLog::getLogHistorySummary('order');
+require_once('doba/DobaProductFile.php');
+require_once('doba/DobaProducts.php');
+require_once('doba/DobaLog.php');
+include_once('doba/DobaApi.php');
+
+$msg = '';
+if (isset($_POST['submit'])) {
+	require_once('doba/DobaInteraction.php');
+	
+	$filename = isset($_FILES['product_file']['name']) ? $_FILES['product_file']['name'] : '';
+	$tmpfile = isset($_FILES['product_file']['tmp_name']) ? $_FILES['product_file']['tmp_name'] : '';
+	$file_type = isset($_POST['file_type']) ? $_POST['file_type'] : '';
+	
+	$objDobaProducts = DobaProductFile::processFile($tmpfile, $file_type);
+	if (is_a($objDobaProducts, 'DobaProducts') && DobaInteraction::loadDobaProductsIntoDB( $objDobaProducts )) {
+		DobaLog::logProductUpload($objDobaProducts, $filename);
+		$msg = $filename.UPLOAD_SUCCESS_MSG;
+	} else {
+		$MSG = UPLOAD_FAILURE_MSG;
+	}
+} else if (isset($_GET['api'])) {
+	if ($_GET['api'] == 'success') {
+		$msg = 'Your products were successfully loaded from Doba';
+	} else {
+		$msg = 'There were problems loading your products from Doba.  Please try again later.';
+	}
+} 
+
 $upload_history = DobaLog::getLogHistorySummary('product');
 ?>
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -52,8 +78,38 @@ $upload_history = DobaLog::getLogHistorySummary('product');
       </tr>
       <tr>
         <td>
-        	
-			<p><strong><?php echo UPLOAD_HISTORY; ?></strong></p>
+        	<?php
+				if ($msg != '') {
+					echo '<p><em>'.$msg.'</em></p>';
+				}
+			?>
+			<form enctype="multipart/form-data" action="doba_products.php" method="POST">
+				<table>
+					<tr>
+						<th><?php echo FORM_PRODUCT_FILE; ?>:</th>
+						<td colspan="2"><input name="product_file" type="file"></td>
+					</tr>
+					<tr>
+						<th><?php echo FORM_FILE_TYPE; ?>:</th>
+						<td colspan="2"><select name="file_type">
+							<option value="tab"><?php echo FORM_FILE_TYPE_TAB; ?></option>
+							<option value="csv"><?php echo FORM_FILE_TYPE_CSV; ?></option>
+						</select></td>
+					</tr>
+					<tr>
+						<th>&nbsp;</th>
+						<td colspan="2"><input type="submit" name="submit" value="<?php echo FORM_SUBMIT_FILE; ?>"></td>
+					</tr>
+				</table>
+			</form>
+			
+			<?php if (DOBA_API_ENABLED === true) { ?>
+				<form action="<?php echo FILENAME_DOBA_API_PRODUCTS; ?>">
+					<p><input type="submit" value="<?php echo LINK_PRODUCT_API; ?>"></p>
+				</form>
+			<?php } ?>
+			
+			<p><strong><?php echo UPLOAD_HISTORY; ?></strong> (last 10)</p>
 			<table class="data">
 				<thead>
 					<tr>
@@ -82,45 +138,7 @@ $upload_history = DobaLog::getLogHistorySummary('product');
 					?>
 						<tr>
 							<td colspan="5" style="color: #999;">
-								<?php echo MSG_NO_PRODUCT_HISTORY; ?>
-							</td>
-						</tr>
-					<?php		
-						}
-					?>					
-				</tbody>
-			</table>
-			
-			<p><strong><?php echo DOWNLOAD_HISTORY; ?></strong></p>
-			<table class="data">
-				<thead>
-					<tr>
-						<th><?php echo TABLE_HEAD_DATE; ?></th>
-						<th><?php echo TABLE_HEAD_XFER_METHOD; ?></th>
-						<th><?php echo TABLE_HEAD_FILENAME; ?></th>
-						<th><?php echo TABLE_HEAD_API_RESPONSE; ?></th>
-						<th><?php echo TABLE_HEAD_ORDER_CNT; ?></th>
-					</tr>
-				</thead>
-				<tbody>
-					<?php 
-						if (count($download_history) > 0) { 
-							foreach ($download_history as $dh) { 
-					?>
-							<tr>
-								<td><?php echo $dh['ymdt']; ?></td>
-								<td><?php echo $dh['xfer_method']; ?></td>
-								<td><?php echo $dh['filename']; ?></td>
-								<td><?php echo $dh['api_response']; ?></td>
-								<td><?php echo $dh['cnt']; ?></td>							
-							</tr>
-					<?php 
-							} 
-						} else {
-					?>
-						<tr>
-							<td colspan="5" style="color: #999;">
-								<?php echo MSG_NO_ORDER_HISTORY; ?>
+								<?php echo MSG_NO_HISTORY; ?>
 							</td>
 						</tr>
 					<?php		

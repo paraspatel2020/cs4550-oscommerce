@@ -46,8 +46,6 @@ class DobaOrderInfo
 	 */
 	var $country;
 
-	//var $items = array();
-
 	/**
 	 * @var int
 	 */
@@ -164,7 +162,7 @@ class DobaOrderInfo
 	{
 		if (!is_null($arg))
 		{
-			$this->state = trim($arg);
+			$this->state = $this->convertStateToAbbr(trim($arg));
 		}
 		
 		return trim($this->state);
@@ -194,7 +192,7 @@ class DobaOrderInfo
 	{
 		if (!is_null($arg))
 		{
-			$this->country = trim($arg);
+			$this->country = $this->convertCountryToAbbr(trim($arg));
 		}
 		
 		return trim($this->country);
@@ -228,12 +226,12 @@ class DobaOrderInfo
 	
 	/**
 	 * Getter setter for $max_expected_total
-	 * @return int
-	 * @param $arg int[optional]
+	 * @return float
+	 * @param $arg float[optional]
 	 */
 	function max_expected_total($arg=null) {
 		if (!is_null($arg)) {
-			$this->max_expected_total = intval($arg);
+			$this->max_expected_total = floatval($arg);
 		}
 		
 		return floatval($this->max_expected_total);
@@ -263,6 +261,42 @@ class DobaOrderInfo
 		}
 		
 		return $ret;
+	}
+	
+	function convertStateToAbbr($s) {
+		if (strlen($s) <= 2) {
+			return $s;
+		}
+		
+		include('doba/state_country.inc');
+		return isset($states[strtolower($s)]) ? $states[strtolower($s)] : $s;
+	}
+	
+	function convertCountryToAbbr($c) {
+		if (strlen($c) <= 2) {
+			return $c;
+		}
+		
+		include('doba/state_country.inc');
+		return isset($countries[strtolower($c)]) ? $countries[strtolower($c)] : $c;
+	}
+
+	
+	function toArray() {
+		return array(
+			'po_number' => $this->po_number(),
+			'first_name' => $this->first_name(),
+			'last_name' => $this->last_name(),
+			'address1' => $this->address1(),
+			'address2' => $this->address2(),
+			'city' => $this->city(),
+			'state' => $this->state(),
+			'postal' => $this->postal(),
+			'country' => $this->country(),
+			'item_id' => $this->item_id(),
+			'quantity' => $this->quantity(),
+			'max_expected_total' => $this->max_expected_total()
+		);		
 	}
 }//end class DobaOrderInfo
 

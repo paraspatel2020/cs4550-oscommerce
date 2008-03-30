@@ -2,10 +2,10 @@
 /*
   $Id: $
 
-  osCommerce, Open Source E-Commerce Solutions
-  http://www.oscommerce.com
+  Doba     Inventory on Demand
+  http://www.doba.com
 
-  Copyright (c) 2007 osCommerce
+  Copyright (c) 2008 Doba
 
   Released under the GNU General Public License
 */
@@ -18,12 +18,12 @@
   $contents = array();
 
   $heading[] = array('text'  => BOX_HEADING_DOBA,
-                     'link'  => tep_href_link(FILENAME_DOBA_CONFIG, 'selected_box=doba_config'));
+                     'link'  => tep_href_link(FILENAME_DOBA_STATS, 'selected_box=doba_config'));
 
   if ($selected_box == 'doba_config') {
-    $contents[] = array('text'  => '<a href="' . tep_href_link(FILENAME_DOBA_CONFIG, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_DOBA_CONFIG . '</a><br>' . 
-								   '<a href="' . tep_href_link(FILENAME_DOBA_PRODUCT_UPLOAD, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_DOBA_UPLOAD_PRODUCT_DATA . '</a><br>' . 
-								   '<a href="' . tep_href_link(FILENAME_DOBA_ORDER_DOWNLOAD, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_DOBA_DOWNLOAD_ORDER_DATA . '</a>');
+    $contents[] = array('text'  => '<a href="' . tep_href_link(FILENAME_DOBA_STATS, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_DOBA_STATS . '</a><br>' . 
+								   '<a href="' . tep_href_link(FILENAME_DOBA_PRODUCTS, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_DOBA_PRODUCTS . '</a><br>' . 
+								   '<a href="' . tep_href_link(FILENAME_DOBA_ORDERS, '', 'NONSSL') . '" class="menuBoxContentLink">' . BOX_DOBA_ORDERS . '</a>');
   }
 
   $box = new box;

@@ -134,6 +134,25 @@ class DobaLog {
 		return;
 	}
 	
+	function logOrderApiSend($objDobaOrders, $response, $time=null, $ids=array()) {
+		if (is_null($time)) {
+			$time = time();
+		}
+		foreach ($objDobaOrders->orders as $o) {
+			if (in_array($o->po_number, $ids)) {
+				$dl = new DobaLog();
+				$dl->datatype('order');
+				$dl->local_id($o->po_number());
+				$dl->xfer_method('api');
+				$dl->ymdt($time, true);
+				$dl->api_response($response);
+				$dl->store();
+			}
+		}
+		
+		return;
+	}
+	
 	function logProductUpload($objDobaProducts, $filename, $time=null) {
 		if (is_null($time)) {
 			$time = time();
@@ -151,6 +170,23 @@ class DobaLog {
 		return;
 	}
 	
+	function logProductApiLoad($objDobaProducts, $response, $time=null) {
+		if (is_null($time)) {
+			$time = time();
+		}
+		foreach ($objDobaProducts->products as $p) {
+			$dl = new DobaLog();
+			$dl->datatype('product');
+			$dl->local_id($p->item_id());
+			$dl->xfer_method('api');
+			$dl->ymdt($time, true);
+			$dl->api_response($response);
+			$dl->store();
+		}
+		
+		return;
+	}
+	
 	function getLogHistorySummary($datatype) {
 		$datatype = trim($datatype);
 		$ret = array();
@@ -160,7 +196,10 @@ class DobaLog {
 				from 
 					DobaLog 
 				where 
-					datatype="' . $datatype .'" group by ymdt';
+					datatype="' . $datatype .'" 
+				group by 1 
+				order by 1 desc
+				limit 10';
 		$history_query = tep_db_query($sql);
 		while ($o = tep_db_fetch_array($history_query)) {
 			$ret[] = $o;
