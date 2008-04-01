@@ -14,4 +14,9 @@ define('DOBA_RETAILER_ID', '1223414');
 // Set this to "true" if you wish to only run test transactions against the testing sandbox.
 // Set this to "false" if this is a "live" implementation.
 define('DOBA_TEST_MODE_ENABLED', true);
+
+// Set this to the default category name you wish to use.
+// This will be used if a category has not been specified by a custom field in your watchlist or data file.
+// The expected header for the custom field is: OSC_CATEGORY
+define('PRODUCT_DEFAULT_CATEGORY_NAME', 'New Products');
 ?>

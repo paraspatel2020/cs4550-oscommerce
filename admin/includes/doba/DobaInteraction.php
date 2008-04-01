@@ -83,7 +83,7 @@ class DobaInteraction {
 				$products_status = ($prod->quantity() > 0) ? 1 : 0;
 				$products_tax_class_id = 1;
 				$manufacturers_id = 'NULL';
-				$categories_id = 0;
+				$categories_id = DobaInteraction::setCategoryName($prod->category_name());
 				$language_id = 1;
 				$products_name = $prod->title();
 				$products_description = $prod->description();
@@ -304,6 +304,43 @@ class DobaInteraction {
 		
 		return $new_cost;
 	}
-	
+
+	function setCategoryName($str='') {
+		$str = trim($str);
+		
+		if ($str == '') {
+			$str = PRODUCT_DEFAULT_CATEGORY_NAME;
+		}
+		
+		$sql = 'select categories_id as id from ' . TABLE_CATEGORIES_DESCRIPTION . ' 
+				where language_id=1 and 
+					  categories_name="' . addslashes(tep_db_prepare_input($str)) . '" 
+				limit 1';
+		$res = tep_db_query($sql);
+		
+		if (is_array(($arr = tep_db_fetch_array($res)))) {
+			return $arr['id'];
+		}
+		
+		$sql = 'insert ignore into ' . TABLE_CATEGORIES . ' 
+					(sort_order, date_added, last_modified) 
+				values 
+					(0, now(), now())';
+		$tc_insert_query = tep_db_query($sql);
+		
+		$id = intval(tep_db_insert_id());
+		
+		if ($id > 0) {
+			$sql = 'insert into ' . TABLE_CATEGORIES_DESCRIPTION . ' 
+						(categories_id, language_id, categories_name)
+					values 
+						(' . intval(tep_db_insert_id()) . ', 1, "' . addslashes(tep_db_prepare_input($str)) . '"), 
+						(' . intval(tep_db_insert_id()) . ', 2, "' . addslashes(tep_db_prepare_input($str)) . '"), 
+						(' . intval(tep_db_insert_id()) . ', 3, "' . addslashes(tep_db_prepare_input($str)) . '")';
+			$tcd_insert_query = tep_db_query($sql);
+		}			
+					
+		return $id;
+	}
 }
 ?>
