@@ -73,6 +73,11 @@ class DobaProductData {
 	 */
 	var $items = array();
 	
+	/**
+	 * @var string 
+	 */
+	var $category_name = '';
+	
 	function DobaProductData() {}
 	
 	/**
@@ -346,6 +351,14 @@ class DobaProductData {
 		}
 		
 		return $this->items;
+	}
+	
+	function category_name($arg=null) {
+		if (!is_null($arg)) {
+			$this->category_name = trim($arg);
+		}
+		
+		return $this->category_name;
 	}	
 }
 ?>
