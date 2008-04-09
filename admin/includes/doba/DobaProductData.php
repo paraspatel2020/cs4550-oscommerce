@@ -77,6 +77,11 @@ class DobaProductData {
 	 * @var string 
 	 */
 	var $category_name = '';
+
+	/**
+	 * @var int
+	 */
+	var $manufacturer_id;
 	
 	function DobaProductData() {}
 	
@@ -359,6 +364,14 @@ class DobaProductData {
 		}
 		
 		return $this->category_name;
-	}	
+	}
+
+	function manufacturer_id($arg=null) {
+		if (!is_null($arg)) {
+			$this->manufacturer_id = trim($arg);
+		}
+		
+		return $this->manufacturer_id;
+	}		
 }
 ?>
