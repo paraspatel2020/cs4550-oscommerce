@@ -1,4 +1,17 @@
 <?php
+define('QTY_FMT_NORMAL', 'normal');
+define('QTY_FMT_NONE', 'none');
+define('QTY_FMT_LIBERAL', 'liberal');
+define('QTY_FMT_CONSERVATIVE', 'conservative');
+define('QTY_FMT_AUTOADJUST', 'osc_quantity_autoadjust');
+define('QTY_FMT_EXACT','osc_quantity_exact');
+define('PRICE_FMT_WHOLESALE_PERCENT', 'osc_wholesale_markup_percent');
+define('PRICE_FMT_WHOLESALE_DOLLAR', 'osc_wholesale_markup_dollar');
+define('PRICE_FMT_EXACT', 'osc_markup_exact');
+define('PRICE_FMT_MSRP_PERCENT', 'osc_msrp_markup_percent');
+define('PRICE_FMT_MSRP_DOLLAR', 'osc_msrp_markup_dollar');
+define('PRICE_FMT_NONE', 'none');
+
 $img_data = array();
 
 class DobaInteraction {
@@ -70,14 +83,14 @@ class DobaInteraction {
 				}
 				$can_insert = true;
 				$products_id = $prod->item_id();
-				$products_quantity = $prod->quantity();
+				$products_quantity = intval($prod->quantity());
 				$products_model = $prod->product_sku();
 				$img_url = $prod->image_url();
 				if (empty($img_url)) {
 					$img_url = $prod->thumb_url();
 				}
 				$products_image = DobaInteraction::processImage($img_url, $products_id);
-				$products_price = $prod->price();
+				$products_price = floatval($prod->price());
 				$products_last_modified = 'now()';
 				$products_weight = $prod->ship_weight();
 				$products_status = ($prod->quantity() > 0) ? 1 : 0;
@@ -202,107 +215,96 @@ class DobaInteraction {
 	 * @param $tempValues array
 	 * @param $temp_supplied_qty int
 	 */
-	function setQuantity($tempHeaders, $tempValues, $temp_supplied_qty) {
-		$headers = $tempHeaders;
-		$values = $tempValues;
-		$new_quantity = $temp_supplied_qty;
-		if (in_array('OSC_QUANTITY_AUTOADJUST', $headers)) {
-			$temp = array_keys($headers,'OSC_QUANTITY_AUTOADJUST');
-			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-				$level = $values[$temp[0]];
-				
-				if (strtolower(trim($level) === QTY_FMT_NORMAL)) {
-					$new_quantity = $temp_supplied_qty * .5; 
-				}
-				elseif (strtolower(trim($level) === QTY_FMT_LIBERAL)) {
-					$new_quantity = $temp_supplied_qty * .75; 
-				}
-				elseif (strtolower(trim($level) === QTY_FMT_CONSERVATIVE)) {
-					$new_quantity = $temp_supplied_qty * .25; 
-				}
-				elseif (strtolower(trim($level) === QTY_FMT_NONE)) {
-					$new_quantity = $temp_supplied_qty; 
-				}
+	function setQuantity($header, $value, $supplied_qty) {
+		$new_quantity = intval($supplied_qty);
+		$column = strval(strtolower(trim($header)));
+		$level = strval(strtolower(trim($value)));
+		/*echo $column;
+		echo ' ';
+		echo $supplied_qty;
+		echo ' ';
+		echo $level;
+		echo '<br>';*/
+		if ($column === QTY_FMT_AUTOADJUST) {			
+			if ($level === QTY_FMT_NORMAL) {
+				$new_quantity = $supplied_qty * .5; 
+			}
+			elseif ($level === QTY_FMT_LIBERAL) {
+				$new_quantity = $supplied_qty * .75; 
+			}
+			elseif ($level === QTY_FMT_CONSERVATIVE) {
+				$new_quantity = $supplied_qty * .25; 
+			}
+			elseif ($level === QTY_FMT_NONE) {
+				$new_quantity = $supplied_qty; 
 			}
 		}
-		elseif (in_array('OSC_QUANTITY_EXACT', $headers)) {
-			$temp = array_keys($headers,'OSC_QUANTITY_EXACT');
-			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-				$new_quantity = $values[$temp[0]];
+		elseif ($column === QTY_FMT_EXACT) {
+			if (intval($value) < intval($supplied_qty)) {
+				$new_quantity = intval($value);
 			}
+			else {
+				$new_quantity = intval($supplied_qty);
+			}
+			
+			
 		}
-		return round($new_quantity);
+		elseif ($column === QTY_FMT_NONE) {
+			$new_quantity = $supplied_qty;
+		}
+		
+		return intval(round($new_quantity));
 	}
 	
 	/**
 	 * Adjusts the price as necessary and returns the new wholesale cost to be supplied to the 
 	 * 		DobaProductData object
-	 * @return the wholesale cost
-	 * @param $tempHeaders array
-	 * @param $tempValues array
-	 * @param $tempWholesale float
-	 * @param $tempMap float
-	 * @param $tempMSRP float
+	 * @return the new wholesale cost
+	 * @param $headers value to be searched for
+	 * @param $value found in the header column to be searched for
+	 * @param $wholesale float
+	 * @param $map float
+	 * @param $msrp float
 	 */
-	function setPrice($tempHeaders, $tempValues, $tempWholesale, $tempMap, $tempMSRP) {
-		$wholesale = $tempWholesale;
-		$map = $tempMap;
-		$msrp = $tempMSRP;
-		$new_cost = $wholesale;	
-		$headers = $tempHeaders;
-		$values = $tempValues;	
-		if (in_array('OSC_WHOLESALE_MARKUP_PERCENT', $headers)) {
-			$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_PERCENT');
-			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-				$percent = $values[$temp[0]];
+	function setPrice($header, $value, $wholesale, $map, $msrp) {
+		$new_cost = $wholesale;
+		$column = strval(strtolower(trim($header)));
+		if (floatval($value) > 0) {
+			if ($column === PRICE_FMT_WHOLESALE_PERCENT) {	
+				$percent = $value;
 				if ($percent > 1) {
 					$percent = $percent / 100;
 				}
 				$new_cost = $wholesale * (1 + $percent);
-				
-				if ($map > 0 && $new_cost < $map) {
-					$new_cost = $map;
-				}
-			}				
-		}
-		elseif (in_array('OSC_WHOLESALE_MARKUP_DOLLAR', $headers)) {
-			$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_DOLLAR');
-			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-				$markup = $values[$temp[0]];
-				$new_cost = $wholesale + $markup;
-				
-				if ($map > 0 && $new_cost < $map) {
-					$new_cost = $map;
-				}
 			}
-		}
-		elseif (in_array('OSC_MSRP_MARKUP_PERCENT', $headers)) {
-			$temp = array_keys($headers, 'OSC_MSRP_MARKUP_PERCENT');
-			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-				$percent = $values[$temp[0]];
+			elseif ($column === PRICE_FMT_WHOLESALE_DOLLAR) {
+				$markup = $value;
+				$new_cost = $wholesale + $markup;
+			}
+			elseif ($column === PRICE_FMT_MSRP_PERCENT) {
+				$percent = $value;
 				if ($percent > 1) {
 					$percent = $percent / 100;
 				}
 				$new_cost = $msrp * (1 + $percent);
-				
-				if ($map > 0 && $new_cost < $map) {
-					$new_cost = $map;
-				}
 			}
-		}
-		elseif (in_array('OSC_MSRP_MARKUP_DOLLAR', $headers)) {
-			$temp = array_keys($headers, 'OSC_MSRP_MARKUP_DOLLAR');
-			if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-				$markup = $values[$temp[0]];
+			elseif ($column === PRICE_FMT_MSRP_DOLLAR) {
+				$markup = $value;
 				$new_cost = $msrp + $markup;
-				
-				if ($map > 0 && $new_cost < $map) {
-					$new_cost = $map;
-				}
+			}							
+			elseif ($column === PRICE_FMT_EXACT) {
+				$new_cost = $value;
 			}
+			elseif ($column === PRICE_FMT_NONE) {
+				$new_cost = $wholesale;
+			}			
 		}
 		
-		return $new_cost;
+		if ($map > 0 && $new_cost < $map) {
+				$new_cost = $map;
+			}
+		
+		return floatval($new_cost);
 	}
 
 	function setCategoryName($str='') {
@@ -340,6 +342,39 @@ class DobaInteraction {
 			$tcd_insert_query = tep_db_query($sql);
 		}			
 					
+		return $id;
+	}
+	
+	function setBrandName($str, $url='') {
+		$str = trim($str);
+		$url = trim($url);
+
+		$sql = 'select manufacturers_id as id from ' . TABLE_MANUFACTURERS . '
+				where manufacturers_name="' . addslashes(tep_db_prepare_input($str)) . '"';
+		$res = tep_db_query($sql);
+
+		if (is_array(($arr = tep_db_fetch_array($res)))) {
+			return $arr['id'];
+		}
+		
+		$sql = 'insert ignore into ' . TABLE_MANUFACTURERS . '	
+					(manufacturers_name, date_added, last_modified)
+				values
+					(' . addslashes(tep_db_prepare_input($str)) . ', now(), now())';
+		$tm_insert_query = tep_db_query($sql);
+
+		$id = intval(tep_db_insert_id());
+
+		if ($id > 0) {
+			$sql = 'insert into ' . TABLE_MANUFACTURERS_INFO . ' 
+						(manufacturers_id, languages_id, manufacturers_url)
+					values 
+						(' . intval(tep_db_insert_id()) . ', 1, "' . addslashes(tep_db_prepare_input($url)) . '"), 
+						(' . intval(tep_db_insert_id()) . ', 2, "' . addslashes(tep_db_prepare_input($url)) . '"), 
+						(' . intval(tep_db_insert_id()) . ', 3, "' . addslashes(tep_db_prepare_input($url)) . '")';
+			$tmi_insert_query = tep_db_query($sql);
+		}			
+
 		return $id;
 	}
 }
