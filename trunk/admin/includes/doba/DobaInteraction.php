@@ -13,6 +13,8 @@ define('PRICE_FMT_MSRP_DOLLAR', 'osc_msrp_markup_dollar');
 define('PRICE_FMT_NONE', 'none');
 
 $img_data = array();
+$brand_data = array();
+$category_data = array();
 
 class DobaInteraction {
 	
@@ -33,13 +35,13 @@ class DobaInteraction {
 		}
 		
 		if (!empty($src)) {
-			$data = file_get_contents($src, FILE_BINARY);
+			$data = @file_get_contents($src, FILE_BINARY);
 			if (!empty($data)) {
 				$i_parts = explode('/', $src);
 				$ref = 'doba___' . $i_parts[count($i_parts)-2] . '_' . $i_parts[count($i_parts)-1];
 				$new_file = $_SERVER['DOCUMENT_ROOT'] . '/images/' . $ref;
-				if (($fh = fopen($new_file, 'w')) !== false) {
-					if (fwrite($fh, $data) === false) {
+				if (($fh = @fopen($new_file, 'w')) !== false) {
+					if (@fwrite($fh, $data) === false) {
 						$ref = '';
 					}
 				} else {
@@ -95,7 +97,7 @@ class DobaInteraction {
 				$products_weight = $prod->ship_weight();
 				$products_status = ($prod->quantity() > 0) ? 1 : 0;
 				$products_tax_class_id = 1;
-				$manufacturers_id = 'NULL';
+				$manufacturers_id = DobaInteraction::setBrandName($prod->brand());
 				$categories_id = DobaInteraction::setCategoryName($prod->category_name());
 				$language_id = 1;
 				$products_name = $prod->title();
@@ -219,12 +221,7 @@ class DobaInteraction {
 		$new_quantity = intval($supplied_qty);
 		$column = strval(strtolower(trim($header)));
 		$level = strval(strtolower(trim($value)));
-		/*echo $column;
-		echo ' ';
-		echo $supplied_qty;
-		echo ' ';
-		echo $level;
-		echo '<br>';*/
+		
 		if ($column === QTY_FMT_AUTOADJUST) {			
 			if ($level === QTY_FMT_NORMAL) {
 				$new_quantity = $supplied_qty * .5; 
@@ -309,9 +306,16 @@ class DobaInteraction {
 
 	function setCategoryName($str='') {
 		$str = trim($str);
-		
+	
 		if ($str == '') {
 			$str = PRODUCT_DEFAULT_CATEGORY_NAME;
+		}
+		
+error_log("Category: ".$str);
+		global $category_data;
+		// return the id if we have already dealt with it in the current load
+		if (isset($category_data[$str])) {
+			return $category_data[$str];
 		}
 		
 		$sql = 'select categories_id as id from ' . TABLE_CATEGORIES_DESCRIPTION . ' 
@@ -321,6 +325,7 @@ class DobaInteraction {
 		$res = tep_db_query($sql);
 		
 		if (is_array(($arr = tep_db_fetch_array($res)))) {
+			$category_data[$str] = $arr['id'];
 			return $arr['id'];
 		}
 		
@@ -341,7 +346,8 @@ class DobaInteraction {
 						(' . intval(tep_db_insert_id()) . ', 3, "' . addslashes(tep_db_prepare_input($str)) . '")';
 			$tcd_insert_query = tep_db_query($sql);
 		}			
-					
+		
+		$category_data[$str] = $id;
 		return $id;
 	}
 	
@@ -349,18 +355,30 @@ class DobaInteraction {
 		$str = trim($str);
 		$url = trim($url);
 
+		if (in_array($str, array('','N/A'))) {
+			return 0;
+		}
+		
+error_log("Brand: ".$str);
+		
+		global $brand_data;
+		if (isset($brand_data[$str])) {
+			return $brand_data[$str];
+		}
+		
 		$sql = 'select manufacturers_id as id from ' . TABLE_MANUFACTURERS . '
 				where manufacturers_name="' . addslashes(tep_db_prepare_input($str)) . '"';
 		$res = tep_db_query($sql);
 
 		if (is_array(($arr = tep_db_fetch_array($res)))) {
+			$brand_data[$str] = $arr['id'];
 			return $arr['id'];
 		}
 		
 		$sql = 'insert ignore into ' . TABLE_MANUFACTURERS . '	
 					(manufacturers_name, date_added, last_modified)
 				values
-					(' . addslashes(tep_db_prepare_input($str)) . ', now(), now())';
+					("' . addslashes(tep_db_prepare_input($str)) . '", now(), now())';
 		$tm_insert_query = tep_db_query($sql);
 
 		$id = intval(tep_db_insert_id());
@@ -375,6 +393,7 @@ class DobaInteraction {
 			$tmi_insert_query = tep_db_query($sql);
 		}			
 
+		$brand_data[$str] = $id;
 		return $id;
 	}
 }

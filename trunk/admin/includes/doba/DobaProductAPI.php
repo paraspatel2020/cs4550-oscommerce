@@ -60,9 +60,16 @@ class DobaProductAPI {
 					DobaProductAPI::findImage($prod, $currProd);
 					$currProd->product_sku($prod['product_sku']);
 					$currProd->ship_weight($prod['ship_weight']);
-					//$currProd->ship_cost($prod['ship_cost']);
-					//$currProd->upc($prod['upc']);
-					//$currProd->brand($prod['brand']);
+					$currProd->ship_cost($prod['ship_cost']);
+					$currProd->upc($prod['upc']);
+					$currProd->brand($prod['brand']);
+					if (isset($prod['OSC_BRAND'])) {
+						$currProd->brand($prod['OSC_BRAND']);
+					}
+					$currProd->category_name('');
+					if (isset($prod['OSC_CATEGORY'])) {
+						$currProd->category_name($prod['OSC_CATEGORY']);
+					}
 					$productList->addProduct($currProd);							
 				}				
 			}
@@ -80,9 +87,20 @@ class DobaProductAPI {
 						DobaProductAPI::findImage($prod, $currProd);
 						$currProd->product_sku($prod['product_sku']);
 						$currProd->ship_weight($prod['ship_weight']);
-						//$currProd->ship_cost($prod['ship_cost']);
-						//$currProd->upc($prod['upc']);
-						//$currProd->brand($prod['brand']);
+						$currProd->ship_cost($prod['ship_cost']);
+						$currProd->upc($prod['upc']);
+						$currProd->brand($prod['brand']);
+						if (isset($prod['OSC_BRAND'])) {
+							$currProd->brand($prod['OSC_BRAND']);
+						} else if (isset($prod['osc_brand'])) {
+							$currProd->brand($prod['osc_brand']);
+						}
+						$currProd->category_name('');
+						if (isset($prod['OSC_CATEGORY'])) {
+							$currProd->category_name($prod['OSC_CATEGORY']);
+						} else if (isset($prod['osc_category'])) {
+							$currProd->category_name($prod['osc_category']);
+						}
 						$productList->addProduct($currProd);							
 					}				
 				}				

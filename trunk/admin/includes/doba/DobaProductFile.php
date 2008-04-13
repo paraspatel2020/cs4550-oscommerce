@@ -105,7 +105,7 @@ class DobaProductFile {
 
 			foreach($tHeaders as $item)
 			{
-			    $headers[] = strtoupper(trim($item));
+			    $headers[] = DobaProductFile::pruneQuotes(strtoupper(trim($item)));
 			}	
 		}
 		
@@ -116,7 +116,7 @@ class DobaProductFile {
 			/* Fields to fill in on the osCommerce add product page
 			 * Products Status:   In Stock,  Out of Stock		. Passing the current available in the object, needs to be processed before being added to database
 			 * Date Available									/
-			 * Products Manufacturer							. Leaving blank
+			 * Products Manufacturer							/
 			 * Products Name (English, Spanish, Ducth)			/
 			 * Tax Class: none, taxable goods					. Default to Taxable, will need setting in the osCommerce config files
 			 * Products Price (Net)								. Will use the MSRP for now.
@@ -174,110 +174,97 @@ class DobaProductFile {
 			if (in_array('OSC_WHOLESALE_MARKUP_PERCENT', $headers)) {
 				$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_PERCENT');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_WHOLESALE_PERCENT, 
-									$values[$temp[0]], $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_WHOLESALE_PERCENT, $values[$temp[0]], $wholesale, $map, $msrp));
 				}
 				else {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, 
-									$wholesale, $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, $wholesale, $wholesale, $map, $msrp));
 				}					
 			}
 			elseif (in_array('OSC_WHOLESALE_MARKUP_DOLLAR', $headers)) {
 				$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_DOLLAR');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_WHOLESALE_DOLLAR, 
-									$values[$temp[0]], $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_WHOLESALE_DOLLAR, $values[$temp[0]], $wholesale, $map, $msrp));
 				}	
 				else {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, 
-									$wholesale, $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, $wholesale, $wholesale, $map, $msrp));
 				}				
 			}	
 			elseif (in_array('OSC_MARKUP_EXACT', $headers)) {
 				$temp = array_keys($headers, 'OSC_MARKUP_EXACT');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_EXACT, 
-									$values[$temp[0]], $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_EXACT, $values[$temp[0]], $wholesale, $map, $msrp));
 				}	
 				else {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, 
-									$wholesale, $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, $wholesale, $wholesale, $map, $msrp));
 				}				
 			}
 			elseif (in_array('OSC_MSRP_MARKUP_PERCENT', $headers)) {
 				$temp = array_keys($headers, 'OSC_MSRP_MARKUP_PERCENT');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_MSRP_PERCENT, 
-									$values[$temp[0]], $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_MSRP_PERCENT, $values[$temp[0]], $wholesale, $map, $msrp));
 				}	
 				else {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, 
-									$wholesale, $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, $wholesale, $wholesale, $map, $msrp));
 				}				
 			}
 			elseif (in_array('OSC_MSRP_MARKUP_DOLLAR', $headers)) {
 				$temp = array_keys($headers, 'OSC_MSRP_MARKUP_DOLLAR');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_MSRP_DOLLAR, 
-									$values[$temp[0]], $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_MSRP_DOLLAR, $values[$temp[0]], $wholesale, $map, $msrp));
 				}	
 				else {
-					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, 
-									$wholesale, $wholesale, $map, $msrp));
+					$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, $wholesale, $wholesale, $map, $msrp));
 				}				
 			}
 			else {
-				$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, 
-									$wholesale, $wholesale, $map, $msrp));
+				$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, $wholesale, $wholesale, $map, $msrp));
 			}	
 			
 			if (in_array('OSC_QUANTITY_AUTOADJUST', $headers)) {
 				$temp = array_keys($headers,'OSC_QUANTITY_AUTOADJUST');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_AUTOADJUST, 
-							$values[$temp[0]], $supplied_qty));
+					$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_AUTOADJUST, $values[$temp[0]], $supplied_qty));
 				}
 				else {
-					$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_NONE, 
-							$supplied_qty, $supplied_qty));
+					$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_NONE, $supplied_qty, $supplied_qty));
 				}	
 			}			
 			elseif (in_array('OSC_QUANTITY_EXACT', $headers)) {
 				$temp = array_keys($headers,'OSC_QUANTITY_EXACT');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_EXACT, 
-							$values[$temp[0]], $supplied_qty));
+					$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_EXACT, $values[$temp[0]], $supplied_qty));
 				}
 				else {
-					$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_NONE, 
-							$supplied_qty, $supplied_qty));
+					$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_NONE, $supplied_qty, $supplied_qty));
 				}	
 			}	
 			else {
-				$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_NONE, 
-							$supplied_qty, $supplied_qty));
+				$tempDPD->quantity(DobaInteraction::setQuantity(QTY_FMT_NONE, $supplied_qty, $supplied_qty));
 			}		
 
-			/*
+			
 			if (in_array('OSC_CATEGORY', $headers)) {
 				$tempCategory = array_keys($headers, 'OSC_CATEGORY');
 				if (isset($values[$tempCategory[0]]) && !empty($values[$tempCategory[0]])) {
-					$tempDPD->category_name(DobaInteraction::setCategoryName($values[$tempCategory[0]]));
+					$tempDPD->category_name(DobaProductFile::pruneQuotes($values[$tempCategory[0]]));
 				}
 			}
+			
+			$temp = array_keys($headers, 'BRAND');
+			$tempDPD->brand(DobaProductFile::pruneQuotes($values[$temp[0]]));
 			
 			if (in_array('OSC_BRAND', $headers)) {
 				$tempBrand = array_keys($headers, 'OSC_BRAND');
 				if (isset($values[$tempBrand[0]]) && !empty($values[$tempBrand[0]])) {
-					$tempDPD->manufacturer_id(DobaInteraction::setBrandName($values[$tempBrand[0]], ''));
+					$tempDPD->brand(DobaProductFile::pruneQuotes($values[$tempBrand[0]]));
 				}
 			}
-			*/	
+				
 			
 			if (in_array('OSC_PRODUCT_LINK', $headers)) {
 				$temp = array_keys($headers, 'OSC_PRODUCT_LINK');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
-					$tempDPD->product_url($values[$temp[0]]);
+					$tempDPD->product_url(DobaProductFile::pruneQuotes($values[$temp[0]]));
 				}
 			}
 			
