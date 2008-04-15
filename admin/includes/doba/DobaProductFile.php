@@ -171,6 +171,13 @@ class DobaProductFile {
 			$temp = array_keys($headers, 'MSRP');
 			$msrp = $values[$temp[0]];
 			
+			/*
+			 * This set of if statements checks if the specified pricing manipulation fields exist
+			 * in the file. If they do, the column header name and the value of the field are sent
+			 * as parameters to DobaInteraction::setPrice(). The supplied wholesale cost, the map price
+			 * and the msrp are also sent as parameters and used in setPrice() to ensure the correct 
+			 * price is calculated.
+			 */
 			if (in_array('OSC_WHOLESALE_MARKUP_PERCENT', $headers)) {
 				$temp = array_keys($headers, 'OSC_WHOLESALE_MARKUP_PERCENT');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
@@ -220,6 +227,13 @@ class DobaProductFile {
 				$tempDPD->price(DobaInteraction::setPrice(PRICE_FMT_NONE, $wholesale, $wholesale, $map, $msrp));
 			}	
 			
+			
+			/*
+			 * This set of if statements checks if the specified quantity manipulation fields exist
+			 * in the file. If they do, the column header name and the value of the field are sent
+			 * as parameters to DobaInteraction::setQuantity(). The supplied quantity is also 
+			 * sent as a parameter and used in setQuantity() to ensure the correct quantity is calculated.
+			 */
 			if (in_array('OSC_QUANTITY_AUTOADJUST', $headers)) {
 				$temp = array_keys($headers,'OSC_QUANTITY_AUTOADJUST');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
@@ -243,6 +257,10 @@ class DobaProductFile {
 			}		
 
 			
+			/*
+			 * if the OSC_CATEGORY field exists, the category name is loaded into the DobaProductsData
+			 * object so that it can be processed.
+			 */
 			if (in_array('OSC_CATEGORY', $headers)) {
 				$tempCategory = array_keys($headers, 'OSC_CATEGORY');
 				if (isset($values[$tempCategory[0]]) && !empty($values[$tempCategory[0]])) {
@@ -253,6 +271,10 @@ class DobaProductFile {
 			$temp = array_keys($headers, 'BRAND');
 			$tempDPD->brand(DobaProductFile::pruneQuotes($values[$temp[0]]));
 			
+			/*
+			 * if the OSC_BRAND field exists, the brand name is loaded into the DobaProductsData
+			 * object so that it can be processed.
+			 */ 
 			if (in_array('OSC_BRAND', $headers)) {
 				$tempBrand = array_keys($headers, 'OSC_BRAND');
 				if (isset($values[$tempBrand[0]]) && !empty($values[$tempBrand[0]])) {
@@ -261,6 +283,10 @@ class DobaProductFile {
 			}
 				
 			
+			/*
+			 * if the OSC_PRODUCT_LINK field exists, the brand name is loaded into the DobaProductsData
+			 * object so that it can be processed.
+			 */
 			if (in_array('OSC_PRODUCT_LINK', $headers)) {
 				$temp = array_keys($headers, 'OSC_PRODUCT_LINK');
 				if (isset($values[$temp[0]]) && !empty($values[$temp[0]])) {
