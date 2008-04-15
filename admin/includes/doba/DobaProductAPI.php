@@ -70,6 +70,46 @@ class DobaProductAPI {
 					if (isset($prod['OSC_CATEGORY'])) {
 						$currProd->category_name($prod['OSC_CATEGORY']);
 					}
+				
+					//Set Price
+					if (isset($prod['OSC_WHOLESALE_MARKUP_PERCENT'])) {
+						$currProd->price(DobaInteraction::setPrice('osc_wholesale_markup_percent', 
+						$prod['OSC_WHOLESALE_MARKUP_PERCENT'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));					
+					}
+					elseif (isset($prod['OSC_WHOLESALE_MARKUP_DOLLAR'])) {
+						$currProd->price(DobaInteraction::setPrice('osc_wholesale_markup_dollar', 
+						$prod['OSC_WHOLESALE_MARKUP_DOLLAR'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));				
+					}	
+					elseif (isset($prod['OSC_MARKUP_EXACT'])) {
+						$currProd->price(DobaInteraction::setPrice('osc_markup_exact', 
+						$prod['OSC_MARKUP_EXACT'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));				
+					}
+					elseif (isset($prod['OSC_MSRP_MARKUP_PERCENT'])) {
+						$currProd->price(DobaInteraction::setPrice('osc_msrp_markup_percent', 
+						$prod['OSC_MSRP_MARKUP_PERCENT'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));				
+					}
+					elseif (isset($prod['OSC_MSRP_MARKUP_DOLLAR'])) {
+						$currProd->price(DobaInteraction::setPrice('osc_msrp_markup_dollar', 
+						$prod['OSC_MSRP_MARKUP_DOLLAR'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));				
+					}
+					else {
+						$currProd->price(DobaInteraction::setPrice('none', 
+						$currProd->wholesale_price(), $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));
+					}							
+
+					//Set Quantity
+					if (isset($prod['OSC_QUANTITY_AUTOADJUST'])) {
+						$currProd->quantity(DobaInteraction::setQuantity('osc_quantity_autoadjust', 
+						$prod['OSC_QUANTITY_AUTOADJUST'], $currProd->quantity));	
+					}			
+					elseif (isset($prod['OSC_QUANTITY_EXACT'])) {
+						$currProd->quantity(DobaInteraction::setQuantity('osc_quantity_exact', 
+						$prod['OSC_QUANTITY_EXACT'], $currProd->quantity));	
+					}	
+					else {
+						$currProd->quantity(DobaInteraction::setQuantity('none', $currProd->quantity, $currProd->quantity));
+					}					
+					
 					$productList->addProduct($currProd);							
 				}				
 			}
@@ -101,6 +141,47 @@ class DobaProductAPI {
 						} else if (isset($prod['osc_category'])) {
 							$currProd->category_name($prod['osc_category']);
 						}
+						
+						//Set Price
+						if (isset($prod['OSC_WHOLESALE_MARKUP_PERCENT'])) {
+							$currProd->price(DobaInteraction::setPrice('osc_wholesale_markup_percent', 
+							$prod['OSC_WHOLESALE_MARKUP_PERCENT'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));					
+						}
+						elseif (isset($prod['OSC_WHOLESALE_MARKUP_DOLLAR'])) {
+							$currProd->price(DobaInteraction::setPrice('osc_wholesale_markup_dollar', 
+							$prod['OSC_WHOLESALE_MARKUP_DOLLAR'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));				
+						}	
+						elseif (isset($prod['OSC_MARKUP_EXACT'])) {
+							$currProd->price(DobaInteraction::setPrice('osc_markup_exact', 
+							$prod['OSC_MARKUP_EXACT'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));				
+						}
+						elseif (isset($prod['OSC_MSRP_MARKUP_PERCENT'])) {
+							$currProd->price(DobaInteraction::setPrice('osc_msrp_markup_percent', 
+							$prod['OSC_MSRP_MARKUP_PERCENT'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));				
+						}
+						elseif (isset($prod['OSC_MSRP_MARKUP_DOLLAR'])) {
+							$currProd->price(DobaInteraction::setPrice('osc_msrp_markup_dollar', 
+							$prod['OSC_MSRP_MARKUP_DOLLAR'], $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));				
+						}
+						else {
+							$currProd->price(DobaInteraction::setPrice('none', 
+							$currProd->wholesale_price(), $currProd->wholesale_price(), $currProd->map(), $currProd->msrp()));
+						}							
+
+						//Set Quantity
+						if (isset($prod['OSC_QUANTITY_AUTOADJUST'])) {
+							$currProd->quantity(DobaInteraction::setQuantity('osc_quantity_autoadjust', 
+							$prod['OSC_QUANTITY_AUTOADJUST'], $currProd->quantity));	
+						}			
+						elseif (isset($prod['OSC_QUANTITY_EXACT'])) {
+							$currProd->quantity(DobaInteraction::setQuantity('osc_quantity_exact', 
+							$prod['OSC_QUANTITY_EXACT'], $currProd->quantity));	
+						}	
+						else {
+							$currProd->quantity(DobaInteraction::setQuantity('none', $currProd->quantity, $currProd->quantity));
+						}					
+						
+						
 						$productList->addProduct($currProd);							
 					}				
 				}				
@@ -141,15 +222,10 @@ class DobaProductAPI {
 			
 			$tempDPD->item_id($ItemDetails['items']['item']['item_id']); 				
 			
-			//TODO: Use the 'setPrice' function in DobaProductFile instead of just setting the price
-			//$wholesale = $item['price'];
-			//$map = $item['map'];
-			//$msrp = $item['msrp'];
-			//$tempDPD->price(DobaProductFile::setPrice($headers, $values, $wholesale, $map, $msrp));
-			$tempDPD->price($ItemDetails['items']['item']['price']);
+			$tempDPD->msrp($ItemDetails['items']['item']['msrp']);
+			$tempDPD->map($ItemDetails['items']['item']['map']);
+			$tempDPD->wholesale_price($ItemDetails['items']['item']['price']);
 			
-			//TODO: Use the 'setQuantity' function in DobaProductFile instead of just setting the quantity
-			//$tempDPD->quantity(DobaProductFile::setQuantity($headers, $values, $supplied_qty));
 			$tempDPD->quantity($ItemDetails['items']['item']['qty_avail']);
 
 			
@@ -163,16 +239,11 @@ class DobaProductAPI {
 				$tempDPD = new DobaProductData();
 				
 				$tempDPD->item_id($item['item_id']); 				
+								
+				$tempDPD->msrp($item['msrp']);
+				$tempDPD->map($item['map']);
+				$tempDPD->wholesale_price($item['price']);
 				
-				//TODO: Use the 'setPrice' function in DobaProductFile instead of just setting the price
-				//$wholesale = $item['price'];
-				//$map = $item['map'];
-				//$msrp = $item['msrp'];
-				//$tempDPD->price(DobaProductFile::setPrice($headers, $values, $wholesale, $map, $msrp));
-				$tempDPD->price($item['price']);
-				
-				//TODO: Use the 'setQuantity' function in DobaProductFile instead of just setting the quantity
-				//$tempDPD->quantity(DobaProductFile::setQuantity($headers, $values, $supplied_qty));
 				$tempDPD->quantity($item['qty_avail']);
 
 				

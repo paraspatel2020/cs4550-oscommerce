@@ -33,6 +33,18 @@ class DobaProductData {
 	 */
 	var $price;
 	/**
+	 * @var float
+	 */
+	var $msrp;
+	/**
+	 * @var float
+	 */
+	var $map;	
+	/**
+	 * @var float
+	 */
+	var $wholesale_price;
+	/**
 	 * @var int
 	 */
 	var $quantity;
@@ -188,6 +200,45 @@ class DobaProductData {
 		
 		return $this->price;
 	}
+
+	/**
+	 * Getter setter for $msrp
+	 * @return float
+	 * @param $arg float[optional]
+	 */
+	function msrp($arg=null) {
+		if (!is_null($arg)) {
+			$this->msrp = (float)$arg;
+		}
+		
+		return $this->msrp;
+	}
+	
+	/**
+	 * Getter setter for $map
+	 * @return float
+	 * @param $arg float[optional]
+	 */
+	function map($arg=null) {
+		if (!is_null($arg)) {
+			$this->map = (float)$arg;
+		}
+		
+		return $this->map;
+	}
+	
+	/**
+	 * Getter setter for $wholesale_price
+	 * @return float
+	 * @param $arg float[optional]
+	 */
+	function wholesale_price($arg=null) {
+		if (!is_null($arg)) {
+			$this->wholesale_price = (float)$arg;
+		}
+		
+		return $this->wholesale_price;
+	}			
 
 	/**
 	 * Getter setter for $quantity
