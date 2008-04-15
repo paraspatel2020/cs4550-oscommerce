@@ -44,11 +44,18 @@ class DobaOrdersAPI {
 				'quantity' => $t['quantity'],
 				'max_expected_total' => $t['max_expected_total']
 			);
+			
+			error_log($t['po_number'].": ".$t['quantity']);
 		}
 		
 		return $ret;
 	}
 	
+	/**
+	 * 
+	 * @return DobaOrders object
+	 * @param $data XML string
+	 */
 	function parseOrderLookupResponse($data)
 	{
 		$orderList = new DobaOrders();
@@ -86,6 +93,11 @@ class DobaOrdersAPI {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return DobaOrders object
+	 * @param $data XML string
+	 */
 	function parseCreateOrderResponse($data)
 	{
 		$orderList = new DobaOrders();
@@ -127,6 +139,11 @@ class DobaOrdersAPI {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return DobaOrders object
+	 * @param $data XML string
+	 */
 	function parseGetOrderDetailResponse($data)
 	{
 		$orderList = new DobaOrders();

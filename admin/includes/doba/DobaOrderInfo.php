@@ -281,7 +281,10 @@ class DobaOrderInfo
 		return isset($countries[strtolower($c)]) ? $countries[strtolower($c)] : $c;
 	}
 
-	
+	/**
+	 * 
+	 * @return array(po_number, first_name, last_name, address1, address2, city, state, postal, country, item_id, quantitiy, max_expected_total)
+	 */
 	function toArray() {
 		return array(
 			'po_number' => $this->po_number(),
