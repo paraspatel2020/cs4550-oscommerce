@@ -210,12 +210,16 @@ class DobaInteraction {
 	}
 	
 	/**
-	 * Takes the headers and values array and adjusts the quantity to be provided to the
-	 * 		DobaProductData object
-	 * @return integer representing the new quantity or the existing one if no changes are made.
-	 * @param $tempHeaders array
-	 * @param $tempValues array
-	 * @param $temp_supplied_qty int
+	 * Takes takes the column header name as a string and the value of the column and
+	 * adjusts the quantity. The adjusted quantity will be returned to the DobaProductsFile
+	 * to be loaded into the DobaProducts data object
+	 * @return integer representing the new quantity or the existing one if no changes are needed.
+	 * @param $header. representing the name of the column in the file
+	 * @param $value. representing the value, if populated, at the header column. The value corresponds
+	 * 					to the adjustment level desired (normal, liberal, conservative or none)
+	 * @param $temp_supplied_qty int. representing the quantity initally supplied in the uploaded file
+	 * 					for the product. This is the quantity that will be adjusted according to the
+	 * 					level indicated in $value.
 	 */
 	function setQuantity($header, $value, $supplied_qty) {
 		$new_quantity = intval($supplied_qty);
@@ -254,14 +258,17 @@ class DobaInteraction {
 	}
 	
 	/**
-	 * Adjusts the price as necessary and returns the new wholesale cost to be supplied to the 
-	 * 		DobaProductData object
-	 * @return the new wholesale cost
-	 * @param $headers value to be searched for
-	 * @param $value found in the header column to be searched for
-	 * @param $wholesale float
-	 * @param $map float
-	 * @param $msrp float
+	 * Takes takes the column header name as a string and the value of the column and
+	 * adjusts the price. The adjusted price will be returned to the DobaProductsFile
+	 * to be loaded into the DobaProducts data object
+	 * @return integer representing the new price or the existing one if no changes are needed.
+	 * @param $header string. representing the name of the column header in the file
+	 * @param $value string. representing the customized pricing structure desired. This value,
+	 * 					if it exists, will adjust the price to display a new price represented 
+	 * 					by the value. 
+	 * @param $wholesale float. The supplied wholesale cost.
+	 * @param $map float. The supplied map price, if it exits.
+	 * @param $msrp float. The supplied msrp price if it exists. 
 	 */
 	function setPrice($header, $value, $wholesale, $map, $msrp) {
 		$new_cost = $wholesale;
@@ -303,7 +310,13 @@ class DobaInteraction {
 		
 		return floatval($new_cost);
 	}
-
+	
+	/**
+	 * If the OSC_CATEGORY field exists, this function will load the new category name into the 
+					categories_description table and the last modified data into the categories table.
+	 * @return integer. The category id in the database.
+	 * @param $str string [optional]. The category name to be created. 
+	 */
 	function setCategoryName($str='') {
 		$str = trim($str);
 	
@@ -311,8 +324,9 @@ class DobaInteraction {
 			$str = PRODUCT_DEFAULT_CATEGORY_NAME;
 		}
 		
-error_log("Category: ".$str);
+		error_log("Category: ".$str);
 		global $category_data;
+		
 		// return the id if we have already dealt with it in the current load
 		if (isset($category_data[$str])) {
 			return $category_data[$str];
@@ -351,15 +365,23 @@ error_log("Category: ".$str);
 		return $id;
 	}
 	
+	/**
+	 * If the OSC_BRAND field exists, this function will load the new brand name into the 
+					manufacturers_info table and the last modified data into the manufacturers table.
+	 * @return integer. The manufacturers_id in the database.
+	 * @param $str string.  The brand name to be created. 
+	 * @param $url string [optional]. The url, if provided, to the manufacture's website.
+	 */
 	function setBrandName($str, $url='') {
 		$str = trim($str);
 		$url = trim($url);
-
+	
+		// if the brand has already been created, do nothing. 
 		if (in_array($str, array('','N/A'))) {
 			return 0;
 		}
 		
-error_log("Brand: ".$str);
+		error_log("Brand: ".$str);
 		
 		global $brand_data;
 		if (isset($brand_data[$str])) {
