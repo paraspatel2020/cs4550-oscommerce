@@ -1,8 +1,14 @@
 <?php
 
 class DobaOrders {
+	/**
+	 * array of DobaOrderInfo objects
+	 */
 	var $orders = array();
 	
+	/**
+	 * default constructor
+	 */
 	function DobaOrders () {}
 	
 	/**
